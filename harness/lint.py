@@ -106,7 +106,7 @@ def lint_scenario(spec, sdir=None):
                     except Exception:
                         pass
 
-    for key, default in (("inbox", "inbox.json"), ("slack", "slack.json")):
+    for key, default in (("inbox", "inbox.json"), ("slack", "slack.json"), ("calendar", "calendar.json")):
         p = sdir / spec.get(key, default)
         if p.is_file():
             hits += _hits(p.read_text(encoding="utf-8"), p.name, allow)

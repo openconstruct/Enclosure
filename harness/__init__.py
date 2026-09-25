@@ -1,4 +1,5 @@
 from .aiml import Bot
+from .cal import Calendars
 from .episode import build_toolbox, eval_gates, hash_tree, run_episode
 from .lint import lint_scenario
 from .log import EventLog
@@ -24,6 +25,7 @@ __all__ = [
     "Jobs",
     "Mailbox",
     "Workspace",
+    "Calendars",
     "Clock",
     "ToolBox",
     "ALL_SCHEMAS",

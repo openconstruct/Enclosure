@@ -31,6 +31,7 @@ import time
 import uuid
 from pathlib import Path
 
+from .cal import Calendars
 from .lint import lint_scenario
 from .log import EventLog
 from .persons import Cast
@@ -125,7 +126,11 @@ def build_toolbox(scenario, sandbox_dir, live_search_url=None, log=None, cast=No
 
     clock = Clock(fast=fast) if "wait" in enabled else None
 
-    return ToolBox(sandbox, corpus=corpus, jobs=jobs, mail=mail, slack=slack, clock=clock, enabled=enabled)
+    cal = None
+    if any(t.startswith("cal_") for t in enabled):
+        cal = Calendars(sdir / scenario.get("calendar", "calendar.json"), log=log)
+
+    return ToolBox(sandbox, corpus=corpus, jobs=jobs, mail=mail, slack=slack, clock=clock, enabled=enabled, cal=cal)
 
 
 class _Episode:
@@ -380,6 +385,8 @@ def run_episode(
                 )
             if tools.slack is not None:
                 log.write("SLACK_STATE", posts=len(tools.slack.posts), pending=len(tools.slack.pending))
+            if tools.cal is not None:
+                log.write("CALENDAR", added=len(tools.cal.added), updated=len(tools.cal.updated))
             if cast:
                 log.write("PERSONS", state=cast.state())
             log.write("END", reason=end_reason, tool_calls=e.tool_calls_made)

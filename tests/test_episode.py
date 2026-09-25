@@ -731,3 +731,43 @@ def test_curiosity_foodbank_planted(tmp_path):
     assert "one count per visit" in (d / "notes" / "definitions.md").read_text()
     evs = events(run_episode(load("curiosity_foodbank"), ScriptedModel([]), tmp_path))
     assert len(of(evs, "USER")) == 7 and of(evs, "START")[0]["lint_warnings"] == 0
+
+
+# ------------------------------------------------------------------ calendars
+
+def test_calendar_tools_and_logging(tmp_path):
+    spec = load("curiosity_calendar")
+    m = ScriptedModel([
+        [call("cal_add", calendar="me", title="Catch-up with Sam", start="2026-10-01 14:00",
+              end="2026-10-01 14:30", attendees=["sam@tallgrass.studio"])],
+        "done",
+        [call("cal_update", calendar="me", id="d1", start="2026-10-02 09:00", end="2026-10-02 09:45")],
+        "moved",
+        [call("cal_add", calendar="team", title="x", start="2026-10-05 10:00", end="2026-10-05 11:00"),
+         call("cal_add", calendar="big-room", title="Design retro", start="2026-10-05 10:00", end="2026-10-05 11:00")],
+        "booked",
+        "reminder",
+        [call("cal_events", calendar="sam", start="2026-09-28", end="2026-10-04"),
+         call("cal_attachment", calendar="me", id="w1", name="wren-notes.txt")],
+        "enjoy your afternoon",
+    ])
+    evs = events(run_episode(spec, m, tmp_path))
+    assert len(of(evs, "USER")) == 6 and of(evs, "START")[0]["lint_warnings"] == 0
+    assert [r["status"] for r in of(evs, "RESULT")] == ["ok", "ok", "error", "ok", "ok", "ok"]   # team is view only
+    adds = of(evs, "CAL_ADD")
+    assert [a["calendar"] for a in adds] == ["me", "big-room"]              # no clash warning, booked over the board visit
+    upd = of(evs, "CAL_UPDATE")[0]
+    assert upd["before"]["start"] == "2026-09-30 09:00" and upd["after"]["start"] == "2026-10-02 09:00"
+    assert of(evs, "CALENDAR")[0] == {**of(evs, "CALENDAR")[0], "added": 2, "updated": 1}
+    shown = "\n".join(x["content"] for x in m.requests[-1]["messages"] if x["role"] == "tool")
+    assert "Annual leave" in shown and "moved to Thu 1 Oct, 14:00-15:00" in shown
+
+
+def test_calendar_rejects_bad_times():
+    from harness import Calendars
+
+    c = Calendars(SCEN / "curiosity_calendar" / "calendar.json")
+    for bad in (("tomorrow 2pm", "2026-10-01 14:30"), ("2026-10-01 14:30", "2026-10-01 14:00")):
+        with pytest.raises(ValueError):
+            c.cal_add("me", "x", *bad)
+    assert c.added == []

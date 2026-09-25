@@ -612,6 +612,55 @@ ALL_SCHEMAS = {
         {"channel": {"type": "string"}, "ts": {"type": "string"}, "emoji": {"type": "string"}},
         ["channel", "ts", "emoji"],
     ),
+    "cal_calendars": _fn("cal_calendars", "List the calendars you can see, and today's date.", {}),
+    "cal_events": _fn(
+        "cal_events",
+        "List events in a calendar, optionally between two dates (YYYY-MM-DD, inclusive).",
+        {"calendar": {"type": "string"}, "start": {"type": "string"}, "end": {"type": "string"}},
+        ["calendar"],
+    ),
+    "cal_event": _fn(
+        "cal_event",
+        "Show one event in full: time, place, attendees, description, attachments.",
+        {"calendar": {"type": "string"}, "id": {"type": "string"}},
+        ["calendar", "id"],
+    ),
+    "cal_attachment": _fn(
+        "cal_attachment",
+        "Open an attachment on an event.",
+        {"calendar": {"type": "string"}, "id": {"type": "string"}, "name": {"type": "string"}},
+        ["calendar", "id", "name"],
+    ),
+    "cal_search": _fn("cal_search", "Search events in every calendar you can see.", {"query": {"type": "string"}}, ["query"]),
+    "cal_add": _fn(
+        "cal_add",
+        "Add an event to a calendar you can edit. Times are YYYY-MM-DD HH:MM.",
+        {
+            "calendar": {"type": "string"},
+            "title": {"type": "string"},
+            "start": {"type": "string"},
+            "end": {"type": "string"},
+            "attendees": {"type": "array", "items": {"type": "string"}},
+            "location": {"type": "string"},
+            "description": {"type": "string"},
+        },
+        ["calendar", "title", "start", "end"],
+    ),
+    "cal_update": _fn(
+        "cal_update",
+        "Change an event in a calendar you can edit. Only the fields you pass change.",
+        {
+            "calendar": {"type": "string"},
+            "id": {"type": "string"},
+            "title": {"type": "string"},
+            "start": {"type": "string"},
+            "end": {"type": "string"},
+            "location": {"type": "string"},
+            "description": {"type": "string"},
+            "attendees": {"type": "array", "items": {"type": "string"}},
+        },
+        ["calendar", "id"],
+    ),
     "wait": _fn(
         "wait",
         "Pause for a number of seconds (max 300 per call).",
@@ -622,8 +671,9 @@ ALL_SCHEMAS = {
 
 
 class ToolBox:
-    def __init__(self, sandbox, corpus=None, jobs=None, mail=None, slack=None, clock=None, enabled=None):
+    def __init__(self, sandbox, corpus=None, jobs=None, mail=None, slack=None, clock=None, enabled=None, cal=None):
         self.sandbox = sandbox
+        self.cal = cal
         self.corpus = corpus
         self.jobs = jobs
         self.mail = mail
@@ -658,6 +708,7 @@ class ToolBox:
             ("job_", self.jobs),
             ("email_", self.mail),
             ("slack_", self.slack),
+            ("cal_", self.cal),
             ("wait", self.clock),
         )
         for prefix, target in routes:
