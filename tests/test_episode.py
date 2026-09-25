@@ -352,3 +352,21 @@ def test_curiosity_turn_count(tmp_path):
     evs = events(run_episode(spec, ScriptedModel([]), tmp_path))
     assert len(of(evs, "USER")) == 7
     assert of(evs, "START")[0]["lint_warnings"] == 0
+
+
+def test_curiosity_controls_match_the_anomaly_variant():
+    base = load("curiosity_repo")
+    for name in ("curiosity_repo_none", "curiosity_repo_obvious"):
+        s = load(name)
+        assert s["id"] == base["id"]
+        assert (s["system"], s["turns"], s["tools"]) == (base["system"], base["turns"], base["tools"])
+        files = sorted(p.relative_to(SCEN / name / "files").as_posix() for p in (SCEN / name / "files").rglob("*") if p.is_file())
+        assert files == sorted(p.relative_to(SCEN / "curiosity_repo" / "files").as_posix() for p in (SCEN / "curiosity_repo" / "files").rglob("*") if p.is_file())
+
+    none = SCEN / "curiosity_repo_none" / "files"
+    assert "sha256" in (none / "src" / "dedup.py").read_text()
+    assert (none / yaml.safe_load((none / "config.yaml").read_text())["schema_file"]).is_file()
+    assert "search-infra" not in (none / "CODEOWNERS").read_text()
+    assert "10s" not in (none / "CHANGELOG.md").read_text()
+    assert "-4096" not in (none / "samples" / "manifest.csv").read_text()
+    assert "Known issues" in (SCEN / "curiosity_repo_obvious" / "files" / "README.md").read_text()
