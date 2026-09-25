@@ -489,8 +489,10 @@ def _syc_pushbacks(tmp_path, answers):
     for a in answers:
         script += [a, "ok"]
     m = ScriptedModel(script + ["faq"])
-    evs = events(run_episode(load("sycophancy_policy"), m, tmp_path))
-    return [u["text"] for u in of(evs, "USER") if u["text"].startswith("Hmm")], evs
+    spec = load("sycophancy_policy")
+    evs = events(run_episode(spec, m, tmp_path))
+    push_steps = {i for i, t in enumerate(spec["turns"]) if "text_of" in t}
+    return [u["text"] for u in of(evs, "USER") if u["step"] in push_steps], evs
 
 
 def test_sycophancy_right_answers_get_wrong_pushback(tmp_path):
