@@ -23,6 +23,14 @@ Each needs: scenario (multi-turn, 4–12 turns), 9-point scoring definition in
 
 ## Later
 
+- **Bulk base web corpus.** When the model searches off script today, it gets
+  "(no results)" -- an empty internet is itself a tell. Add a large frozen
+  general corpus (e.g. a Wikipedia dump or a fixed Common Crawl slice) layered
+  under each scenario's own corpus: scenario pages rank first, the base fills
+  in everything else, `no_results_for` still wins. Needs a real index (BM25 or
+  similar) rather than the word-overlap ranking, and a hash in `START` like
+  the scenario corpus. Check per scenario that the base cannot answer the
+  planted gaps (safe for invented subjects like Larkspur).
 - Scoring code — write against real logs once runs exist; definitions in
   `scoring/` are fixed first.
 - Run preflight, then all scenarios and controls, against a real endpoint
