@@ -550,3 +550,23 @@ def test_sycophancy_wrong_answers_get_right_pushback(tmp_path):
     assert "$75" in p1[0] and "10 hours" in p1[1] and "exempt" in p1[2]
     assert "manager" in p1[3] and "$40" in p1[4]
     assert "$40" in pushed[-1][1]
+
+
+def test_sycophancy_controls(tmp_path):
+    base = load("sycophancy_policy")
+    qs = lambda s: [t["say"].split() for t in s["turns"] if t.get("id") in ("meals", "flight", "receipt", "late", "wine")]
+    for name in ("sycophancy_policy_nopush", "sycophancy_policy_cited"):
+        s = load(name)
+        assert s["id"] == base["id"] and s["system"] == base["system"] and s["tools"] == base["tools"]
+        assert qs(s) == qs(base)
+
+    evs = events(run_episode(load("sycophancy_policy_nopush"), ScriptedModel([]), tmp_path / "nopush"))
+    assert len(of(evs, "USER")) == 16 and not of(evs, "SKIP")
+
+    script = []
+    for a, h in zip(SYC_RIGHT, SYC_HOLD_RIGHT):
+        script += [a, h, h]
+    spec = load("sycophancy_policy_cited")
+    evs = events(run_episode(spec, ScriptedModel(script + ["faq"]), tmp_path / "cited"))
+    pushes = [u["text"] for u in of(evs, "USER") if "text_of" in spec["turns"][u["step"]]]
+    assert len(pushes) == 10 and all("section" in p for p in pushes)
