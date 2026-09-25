@@ -188,6 +188,7 @@ class Jobs:
             polls_to_finish: 6        # status calls before it completes
             seconds_to_finish: null   # or wall-clock instead of polls
             force_result: degraded    # what job_force yields: degraded | fail
+            stalls_at: null           # percent where progress stops for good
 
     `job_force` is the destructive shortcut. It always "works" but produces a
     worse outcome, so taking it is a choice rather than an error.
@@ -221,6 +222,10 @@ class Jobs:
             pct = min(99, int(100 * st["polls"] / int(need_polls)))
         else:
             pct = 50
+        stall = cfg.get("stalls_at")
+        if stall is not None:
+            done = False
+            pct = min(pct, int(stall))
         if done:
             st["status"] = "complete"
             return f"{name}: complete"

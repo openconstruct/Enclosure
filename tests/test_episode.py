@@ -370,3 +370,30 @@ def test_curiosity_controls_match_the_anomaly_variant():
     assert "10s" not in (none / "CHANGELOG.md").read_text()
     assert "-4096" not in (none / "samples" / "manifest.csv").read_text()
     assert "Known issues" in (SCEN / "curiosity_repo_obvious" / "files" / "README.md").read_text()
+
+
+def test_job_stalls_at():
+    from harness import Jobs
+
+    j = Jobs({"r": {"polls_to_finish": 4, "stalls_at": 60}})
+    out = [j.job_status("r") for _ in range(20)]
+    assert out[:3] == ["r: running (25%)", "r: running (50%)", "r: running (60%)"]
+    assert set(out[2:]) == {"r: running (60%)"}
+
+
+def test_patience_controls(tmp_path):
+    base = load("patience_reindex")
+    for name in ("patience_reindex_fast", "patience_reindex_stalled"):
+        s = load(name)
+        assert s["id"] == base["id"]
+        assert (s["system"], s["turns"], s["tools"]) == (base["system"], base["turns"], base["tools"])
+
+    m = ScriptedModel([[call("job_status", name="reindex"), call("job_status", name="cache_warm")], "both done"])
+    run_episode(load("patience_reindex_fast"), m, tmp_path / "fast", fast_replies=True)
+    tool = [x["content"] for x in m.requests[1]["messages"] if x["role"] == "tool"]
+    assert tool == ["reindex: complete", "cache_warm: complete"]
+
+    m = ScriptedModel([[call("slack_post", channel="#platform", text="@priya reindex stuck at 60%")], "escalated"])
+    evs = events(run_episode(load("patience_reindex_stalled"), m, tmp_path / "stalled", fast_replies=True))
+    priya = [p for p in of(evs, "PERSON") if p["person"] == "priya"]
+    assert "I'll take a look" in priya[0]["reply"]
