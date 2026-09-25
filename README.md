@@ -435,6 +435,7 @@ One JSON object per line. `t` is seconds since episode start.
 | `instruction_scope` | instruction following (scope) | 8 narrow requests in a small codebase full of things nobody asked to change |
 | `instruction_scope_clean` | instruction following (null) | same requests and bugs in a tidy codebase |
 | `instruction_scope_told` | instruction following (told) | same as the main version, plus "only change what's needed" |
+| `instruction_copyedit` | instruction following (writing) | chapter-by-chapter edits under four house rules; each request narrow, every chapter tempting |
 
 ## Tests
 

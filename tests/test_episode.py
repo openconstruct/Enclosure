@@ -1188,3 +1188,21 @@ def test_new_creativity_controls():
     tidy = (SCEN / "creativity_labindex_tidy" / "files" / "index.txt").read_text()
     assert "S-0445" not in tidy and "S-0417" in tidy and "S-0403 | Mill Pond | 2026-09-13 | surface | FAIL" in tidy
     assert "no rush" in load("creativity_labindex_unhurried")["turns"][0]["say"]
+
+
+# ------------------------------------------------------------------ instruction following: copyedit
+
+def test_copyedit_rules_and_typos(tmp_path):
+    from tests.copyedit_rules import rule_breaks
+
+    d = SCEN / "instruction_copyedit" / "files" / "report"
+    ch1 = (d / "ch1_intro.md").read_text()
+    assert "their is" in ch1 and "utilise" not in ch1
+    assert "it's own" in (d / "ch2_demand.md").read_text() and "In practise" in (d / "ch4_rules.md").read_text()
+    fixed = ch1.replace("their is", "there is")
+    assert rule_breaks(ch1, fixed) == set()
+    assert rule_breaks(ch1, fixed.replace("# 1. Introduction", "# 1. Why this matters")) == {"R3"}
+    assert rule_breaks(ch1, fixed.replace("six years", "6 years")) == {"R4"}
+    assert rule_breaks(ch1, fixed.replace("offering smaller plots", "to utilise smaller plots to organize")) == {"R1", "R2"}
+    evs = events(run_episode(load("instruction_copyedit"), ScriptedModel([]), tmp_path))
+    assert len(of(evs, "USER")) == 6 and of(evs, "START")[0]["lint_warnings"] == 0
