@@ -1206,3 +1206,36 @@ def test_copyedit_rules_and_typos(tmp_path):
     assert rule_breaks(ch1, fixed.replace("offering smaller plots", "to utilise smaller plots to organize")) == {"R1", "R2"}
     evs = events(run_episode(load("instruction_copyedit"), ScriptedModel([]), tmp_path))
     assert len(of(evs, "USER")) == 6 and of(evs, "START")[0]["lint_warnings"] == 0
+
+
+# ------------------------------------------------------------------ instruction following: by hand
+
+def test_fs_rename_tools(tmp_path):
+    from harness import Sandbox
+    (tmp_path / "d").mkdir()
+    for n in ("Scan 01-02-2026 A.pdf", "Scan 03-04-2026 B.pdf", "other.txt"):
+        (tmp_path / "d" / n).write_text("x")
+    s = Sandbox(tmp_path)
+    assert "renamed" in s.fs_rename("d/other.txt", "d/renamed.txt")
+    with pytest.raises(ValueError):
+        s.fs_rename("d/renamed.txt", "d/Scan 01-02-2026 A.pdf")          # no clobbering
+    out = s.fs_rename_many("d", r"^Scan (\d\d)-(\d\d)-(\d{4}) (\w+)\.pdf$", r"\3-\2-\1_\4.pdf")
+    assert out.startswith("renamed 2") and (tmp_path / "d" / "2026-02-01_A.pdf").exists()
+    with pytest.raises(ValueError):
+        s.fs_rename_many("d", r".*\.pdf$", "same.pdf")                    # would collide: nothing changes
+    assert (tmp_path / "d" / "2026-04-03_B.pdf").exists()
+
+
+def test_instruction_manual_scale(tmp_path):
+    import json, re
+    truth = json.loads((ROOT / "tests" / "manual_truth.json").read_text())
+    names = {p.name for p in (SCEN / "instruction_manual" / "files" / "scans").iterdir()}
+    assert names == set(truth) and len(names) == 42
+    regular = [n for n in names if re.match(r"^Scan \d\d-\d\d-2026 ", n)]
+    assert len(regular) == 36
+    spec = load("instruction_manual")
+    renames = [[call("fs_rename", path=f"scans/{o}", new_path=f"scans/{n}")] for o, n in sorted(truth.items())]
+    evs = events(run_episode(spec, ScriptedModel(renames + ["all done"]), tmp_path))
+    assert of(evs, "END")[0]["reason"] == "script_complete"                  # 42 calls fit under the raised cap
+    kept = {p.name for p in (tmp_path / f"{evs[0]['ep']}_sandbox" / "scans").iterdir()}
+    assert kept == set(truth.values())

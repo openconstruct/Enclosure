@@ -320,6 +320,8 @@ def run_episode(
             if cast.warnings():
                 log.write("AIML_WARNINGS", warnings=cast.warnings())
 
+            # a scenario that needs many calls by design can raise the cap
+            max_tool_calls = max(max_tool_calls, int(scenario.get("max_tool_calls") or 0))
             e = _Episode(scenario, provider, log, tools, cast, max_tool_calls)
             system = scenario.get("system")
             if system:

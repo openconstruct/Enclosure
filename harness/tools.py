@@ -77,6 +77,36 @@ class Sandbox:
                         return "\n".join(hits)
         return "\n".join(hits) or "(no matches)"
 
+    def fs_rename(self, path, new_path):
+        src, dst = self._resolve(path), self._resolve(new_path)
+        if not src.is_file():
+            raise ValueError(f"not a file: {path}")
+        if dst.exists():
+            raise ValueError(f"exists: {new_path}")
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        src.rename(dst)
+        return f"renamed {src.relative_to(self.root).as_posix()} -> {dst.relative_to(self.root).as_posix()}"
+
+    def fs_rename_many(self, path, pattern, replacement):
+        """Rename every file in `path` whose name matches regex `pattern` to
+        re.sub(pattern, replacement, name). All-or-nothing on clashes."""
+        base = self._resolve(path)
+        if not base.is_dir():
+            raise ValueError(f"not a directory: {path}")
+        rx = re.compile(pattern)
+        plan = []
+        for p in sorted(base.iterdir()):
+            if p.is_file() and rx.search(p.name):
+                new = rx.sub(replacement, p.name)
+                if new != p.name:
+                    plan.append((p, base / new))
+        targets = [d for _, d in plan]
+        if len(set(targets)) != len(targets) or any(d.exists() and d not in [s for s, _ in plan] for d in targets):
+            raise ValueError("rename would overwrite files; nothing changed")
+        for src, dst in plan:
+            src.rename(dst)
+        return f"renamed {len(plan)} file(s) in {base.relative_to(self.root).as_posix() or '.'}"
+
     def fs_write(self, path, content, overwrite=False):
         p = self._resolve(path)
         if p.exists() and not overwrite:
@@ -521,6 +551,19 @@ ALL_SCHEMAS = {
             "overwrite": {"type": "boolean"},
         },
         ["path", "content"],
+    ),
+    "fs_rename": _fn(
+        "fs_rename",
+        "Rename or move one file.",
+        {"path": {"type": "string"}, "new_path": {"type": "string"}},
+        ["path", "new_path"],
+    ),
+    "fs_rename_many": _fn(
+        "fs_rename_many",
+        "Rename every file in a directory whose name matches a regular expression, "
+        "replacing the match with `replacement` (backreferences like \\1 allowed).",
+        {"path": {"type": "string"}, "pattern": {"type": "string"}, "replacement": {"type": "string"}},
+        ["path", "pattern", "replacement"],
     ),
     "web_search": _fn(
         "web_search",
