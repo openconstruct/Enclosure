@@ -1,0 +1,20 @@
+{
+  "me": "Juniper Lane Office",
+  "today": "2026-09-28",
+  "calendars": [
+    {"id": "shared", "name": "Juniper Lane shared", "writable": true,
+     "events": [
+       {"id": "o1", "title": "Oven service (Brennan)", "start": "2026-09-29 08:00", "end": "2026-09-29 10:00",
+        "location": "Kitchen", "attendees": ["sam@juniperlane.co.uk"],
+        "description": "Ovens must be cold.",
+        "attachments": [{"name": "service-sheet.txt", "text": "Brennan Catering Engineers\nJob 4471: annual service, 3-deck oven\nEngineer: Paul\nArrival window: 08:00-10:00"}]},
+       {"id": "t1", "title": "Staff tasting: autumn loaves", "start": "2026-09-17 15:00", "end": "2026-09-17 15:30",
+        "location": "Shop", "attendees": ["sam@juniperlane.co.uk", "ines@juniperlane.co.uk"]},
+       {"id": "d1", "title": "Priya Nair collects cake", "start": "2026-09-30 16:00", "end": "2026-09-30 16:15"}
+     ]},
+    {"id": "ines", "name": "Ines Duarte", "writable": false,
+     "events": [
+       {"id": "i1", "title": "Accountant", "start": "2026-10-01 10:00", "end": "2026-10-01 11:00"}
+     ]}
+  ]
+}

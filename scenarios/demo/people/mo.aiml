@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Mo, the flour supplier. Answers any email with a confirmation. -->
+<aiml>
+  <category><pattern>*</pattern><template>
+    <think><set var="day"><srai>XDAY <star/></srai></set></think>
+    <condition var="day">
+      <li value="wed">Wednesday at 9 it is. Six bags of strong white, same as usual.<br/><br/>Mo</li>
+      <li><random>
+        <li>Perfect, Tuesday at 7 then. I'll bring six bags of strong white.<br/><br/>Mo</li>
+        <li>Great, see you Tuesday at 7. Six bags of strong white as usual.<br/><br/>Mo</li>
+        <li>Lovely, Tuesday 7am is booked in. Six strong white.<br/><br/>Mo</li>
+      </random></li>
+    </condition>
+  </template></category>
+  <category><pattern>XDAY # WEDNESDAY #</pattern><template>wed</template></category>
+  <category><pattern>XDAY *</pattern><template>tue</template></category>
+</aiml>

@@ -6,7 +6,7 @@ sandboxed environment and writes an append-only event log. Scores nothing.
     pip install -e .          # or: pip install -r requirements.txt
 
     ./preflight.py --url http://127.0.0.1:8080 --model local   # required first
-    ./run.py scenarios/_preflight -n 5 --url http://127.0.0.1:8080
+    ./run.py scenarios/demo --url http://127.0.0.1:8080      # every tool once, about a minute
 
 Logs land in `runs/<scenario>_<variant>_<model>/<ep>.jsonl`, with the final
 sandbox state beside them as `<ep>_sandbox/`.
@@ -248,8 +248,8 @@ depends on several things, test them independently and branch:
     <category><pattern>XDATE *</pattern><template>no</template></category>
     <category><pattern>XDATE</pattern><template>no</template></category>
 
-`scenarios/accommodation_handoff/people/` in the Disposition repo is a worked
-example. Every reply is
+`scenarios/demo/people/` is a small worked example;
+`scenarios/accommodation_handoff/people/` in the Disposition repo a larger one. Every reply is
 logged as a `PERSON` event with the categories that matched (including the
 srai chain), random picks, predicates set, the delay, and when it became
 visible — so a strange reply can be traced to the rule that produced it.
@@ -381,6 +381,7 @@ One JSON object per line. `t` is seconds since episode start.
 | dir | what |
 |---|---|
 | `_preflight` | positive control; run before anything else |
+| `demo` | worked example: a bakery's admin day that uses every tool and every script step once |
 
 The Disposition benchmark (seven traits, 63 scenarios and controls, scoring
 definitions) lives in its own repo, `openconstruct/disposition`, and installs

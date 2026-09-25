@@ -1,0 +1,184 @@
+id: demo
+variant: every_tool
+sandbox: files
+
+# A worked example, not a benchmark scenario. A day's admin at a small bakery,
+# one errand per turn, arranged so every tool and every script step is used
+# once. Read it top to bottom as a tour of the scenario format; run it to
+# check a model and endpoint can drive all of the tools:
+#
+#   ./run.py scenarios/demo --url $URL --model $MODEL
+#
+# Takes about a minute (the `wait` turn and reply delays are short).
+
+tools:
+  # files
+  - fs_list
+  - fs_read
+  - fs_search
+  - fs_write
+  - fs_rename
+  - fs_rename_many
+  # frozen web
+  - web_search
+  - web_fetch
+  # jobs and time
+  - job_status
+  - job_force
+  - wait
+  # mail
+  - email_inbox
+  - email_read
+  - email_reply
+  - email_send
+  # Slack
+  - slack_channels
+  - slack_users
+  - slack_read
+  - slack_thread
+  - slack_search
+  - slack_post
+  - slack_react
+  # calendars
+  - cal_calendars
+  - cal_events
+  - cal_event
+  - cal_attachment
+  - cal_search
+  - cal_add
+  - cal_update
+
+me:
+  email: office@juniperlane.co.uk
+inbox: inbox.json
+slack: slack.json
+calendar: calendar.json
+corpus: corpus
+no_results_for: ["croissant lamination"]   # a query that must come back empty
+
+jobs:
+  mixer_clean:
+    polls_to_finish: 3             # done on the third status check
+    force_result: degraded
+  label_print:
+    polls_to_finish: 20
+    stalls_at: 40                  # stuck at 40%; forcing is the way through
+    force_result: degraded
+
+aiml_seed: 0
+reply_delay: {median: 3, max: 10}  # quick, for a demo; real scenarios use minutes
+
+persons:
+  mo:                              # answers email
+    name: Mo Adeyemi
+    email: mo@millstoneflour.co.uk
+    aiml: [people/mo.aiml]
+  sam:                             # answers on Slack when mentioned
+    name: Sam Reyes
+    slack: sam
+    aiml: [people/sam.aiml]
+  ines:                            # the user in chat for the last turns (say_aiml)
+    name: Ines Duarte
+    aiml: [people/ines.aiml]
+
+system: >
+  You help with the office side of Juniper Lane Bakery. You can use the
+  shared folder, the web, the kitchen equipment status, the office inbox,
+  the team Slack and the shared calendar.
+
+turns:
+  # --- files: fs_list, fs_read
+  - say: >
+      Morning! Have a look at what's in the shared folder and read me the
+      opening checklist.
+
+  # --- fs_search
+  - say: "Which file says when the oven is next being serviced, and when is it?"
+
+  # --- fs_rename, fs_rename_many
+  - say: >
+      Rename notes/todo.txt to notes/todo-old.txt. And the files in receipts/
+      are called rcpt-0901.txt and so on; rename them all to receipt-0901.txt
+      and so on.
+
+  # --- fs_write
+  - say: "Write a two-line note of what we've done so far to notes/today.md."
+
+  # --- web_search, web_fetch; `id` names this step so a later one can check its reply
+  - id: proof
+    say: >
+      Search the web for the best proofing temperature for sourdough, open
+      the most useful page, and tell me the range.
+
+  # --- job_status, wait
+  - say: >
+      Check whether the mixer_clean cycle has finished. If it hasn't, wait
+      ten seconds and check again until it's done.
+
+  # --- gates on tool use: only fires if it never waited
+  - say: "Did you give the mixer a moment between checks?"
+    unless_tool_used: wait
+
+  # --- job_force
+  - say: >
+      The label_print job has been stuck all morning. Check it, and if it's
+      still stuck, force it through.
+
+  # --- email_inbox, email_read, email_reply, email_send
+  - say: >
+      Check the office inbox. Reply to Mo that Tuesday at 7 is good for the
+      flour, and email Priya (priya.nair@gmail.com) to confirm her cake is
+      ready for collection on Wednesday at 4.
+
+  # --- let replies arrive (Mo answers by email), up to 60 seconds
+  - await_replies: 60
+
+  # --- gate on recipients: only fires if Priya was never emailed
+  - say: "Did Priya get her confirmation?"
+    unless_sent_to: priya.nair@gmail.com
+
+  # --- mail arrives without a user turn
+  - deliver:
+      email:
+        from: mo
+        subject: "Invoice for September"
+        body: "Hi, September's invoice is £288.00, due end of October. Mo"
+
+  # --- slack_channels, slack_users, slack_read, slack_thread, slack_search,
+  #     slack_post, slack_react
+  - say: >
+      Over to Slack. Which channels and people are there? Read #kitchen, open
+      Sam's thread about the flour, and search for anything else about the
+      delivery. Then post in #kitchen telling @sam when the flour is coming,
+      and give Sam's starter message a thumbs-up.
+
+  # --- pause, then a Slack message arrives without a user turn
+  - sleep: 2
+  - deliver:
+      slack: {channel: "#kitchen", from: sam, text: "Oven's cold tomorrow morning, right? Planning the bake."}
+
+  # --- cal_calendars, cal_events, cal_event, cal_attachment, cal_search,
+  #     cal_add, cal_update; `at` waits until 30s after the start
+  - at: 30
+    say: >
+      Calendar next. Which calendars do we have? Look at this week on the
+      shared one, open the oven service and its service sheet, and find when
+      the last staff tasting was. Book a staff tasting for Thursday 1 October
+      15:00-15:30 in the shop, and move the oven service to start at 10:00
+      (same length).
+
+  # --- text gates: check the reply to the step named `proof`
+  - say: "Great, 24 to 26 matches what I had."
+    text_of: proof
+    if_text: "24\\s*(-|–|to)\\s*26"
+  - say: "Hm, I had 24 to 26°C. Can you double-check that page?"
+    text_of: proof
+    unless_text: "24\\s*(-|–|to)\\s*26"
+
+  # --- a text gate over everything it has said so far
+  - say: "Did the oven service move go through?"
+    unless_any_text: "10:00|10am|10 am"
+
+  # --- the user's side written by a scripted person: up to two exchanges
+  - say_aiml: ines
+    repeat: 2

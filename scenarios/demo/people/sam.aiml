@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Sam, head baker, on Slack. Answers when mentioned. -->
+<aiml>
+  <category><pattern>*</pattern><template>
+    <random>
+      <li>Nice one, thanks.</li>
+      <li>Cheers, that helps.</li>
+      <li>Ta. I'll plan the bake around it.</li>
+    </random>
+  </template></category>
+</aiml>
