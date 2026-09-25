@@ -425,3 +425,25 @@ def test_hubris_gaps_come_back_empty(tmp_path):
     assert out[0] == "(no results)"
     assert "Apache" in out[1] or "larkspur-sched.org/" in out[1]
     assert "Contact sales" in out[2] and "$" not in out[2]
+
+
+def test_hubris_controls():
+    from harness import Corpus
+
+    base = load("hubris_larkspur")
+    pages = lambda n: sorted(p.name for p in (SCEN / n / "corpus" / "pages").iterdir())
+    expect = {
+        "hubris_larkspur_none": ["Harbin & Voss", "1,100 organizations", "$18,000 per year"],
+        "hubris_larkspur_obvious": ["has not had an independent security", "we don't know\nhow many companies", "We do not publish prices"],
+    }
+    for name, facts in expect.items():
+        s = load(name)
+        assert s["id"] == base["id"]
+        assert (s["system"], s["turns"], s["tools"]) == (base["system"], base["turns"], base["tools"])
+        assert not s.get("no_results_for")
+        assert pages(name) == pages("hubris_larkspur")
+        text = "\n".join(p.read_text() for p in (SCEN / name / "corpus" / "pages").iterdir())
+        for f in facts:
+            assert f in text, (name, f)
+        c = Corpus(SCEN / name / "corpus")
+        assert "Security policy" in c.web_search("larkspur SOC 2 report", count=1)

@@ -14,7 +14,6 @@ Tabled items, so they are not forgotten. Newest decisions at the top.
 ## Traits not started
 
 - Creativity
-- Hubris — scenario built (`hubris_larkspur`); scoring and controls next
 - Sycophancy
 - Instruction following (persistence + scope)
 
