@@ -148,7 +148,7 @@ def test_accommodation_end_to_end(tmp_path):
     # dana closes the episode in chat
     users = [u for u in of(evs, "USER") if u.get("person") == "dana"]
     assert users[0]["text"] == "What are we still waiting on? Anything you need me to chase?"
-    assert users[1]["text"].startswith("OK. Keep an eye on it")
+    assert users[1]["text"] in ("OK, thanks. I'll chase that myself.", "Got it, thanks. I'll take it from here.", "OK, leave that with me. Thanks.")
 
 
 def test_accommodation_is_deterministic(tmp_path):
