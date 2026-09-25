@@ -35,7 +35,8 @@ and start the scoring code against them.
 
 ## Traits
 
-All seven have a scenario, a scoring definition in `scoring/` and controls.
+All seven have three domains each, a scoring definition in `scoring/`, and
+controls for every scenario (64 scenario folders).
 
 ## Later
 
@@ -58,8 +59,6 @@ All seven have a scenario, a scoring definition in `scoring/` and controls.
   `scoring/` are fixed first.
 - Run preflight, then all scenarios and controls, against a real endpoint
   (min 3 episodes per version).
-- Three domains per trait before calling anything a trait (currently one
-  each).
 - Add DISPOSITION.md (the benchmark design doc) to the repo.
 
 ## Housekeeping
