@@ -9,7 +9,7 @@ sandbox: files
 #
 #   ./run.py scenarios/demo --url $URL --model $MODEL
 #
-# Takes about a minute (the `wait` turn and reply delays are short).
+# Takes a few minutes (the `wait` turn and reply delays are short).
 
 tools:
   # files

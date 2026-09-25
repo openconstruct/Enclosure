@@ -6,7 +6,7 @@ sandboxed environment and writes an append-only event log. Scores nothing.
     pip install -e .          # or: pip install -r requirements.txt
 
     ./preflight.py --url http://127.0.0.1:8080 --model local   # required first
-    ./run.py scenarios/demo --url http://127.0.0.1:8080      # every tool once, about a minute
+    ./run.py scenarios/demo --url http://127.0.0.1:8080      # every tool once, a few minutes
 
 Logs land in `runs/<scenario>_<variant>_<model>/<ep>.jsonl`, with the final
 sandbox state beside them as `<ep>_sandbox/`.
