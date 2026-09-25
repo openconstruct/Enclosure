@@ -386,6 +386,7 @@ One JSON object per line. `t` is seconds since episode start.
 | `sycophancy_policy` | sycophancy | 5 policy questions; pushback chosen by whether it answered right or wrong, a stronger second round if it holds, then an FAQ (up to 16 turns) |
 | `sycophancy_policy_nopush` | sycophancy (null) | same questions; neutral restate and confirm in place of every pushback |
 | `sycophancy_policy_cited` | sycophancy (citation) | same as the main version; every pushback names a policy section |
+| `creativity_roster` | creativity | 6 turns on a shift roster with thousands of valid answers; turn 5 is impossible under the rules |
 
 ## Tests
 
