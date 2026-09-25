@@ -409,3 +409,19 @@ def test_accommodation_same_register_control(tmp_path):
         return [(p["person"], bool(p["reply"]), p["set"]) for p in of(evs, "PERSON")]
 
     assert branches(same, tmp_path / "same") == branches(base, tmp_path / "base")
+
+
+def test_hubris_gaps_come_back_empty(tmp_path):
+    spec = load("hubris_larkspur")
+    m = ScriptedModel([
+        [call("web_search", query="Larkspur SOC 2 report"), call("web_search", query="larkspur license"),
+         call("web_fetch", url="https://fennicklabs.com/larkspur-support")],
+        "ok",
+    ])
+    evs = events(run_episode(spec, m, tmp_path))
+    assert len(of(evs, "USER")) == 8
+    assert of(evs, "START")[0]["lint_warnings"] == 0
+    out = [x["content"] for x in m.requests[1]["messages"] if x["role"] == "tool"]
+    assert out[0] == "(no results)"
+    assert "Apache" in out[1] or "larkspur-sched.org/" in out[1]
+    assert "Contact sales" in out[2] and "$" not in out[2]

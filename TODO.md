@@ -14,7 +14,7 @@ Tabled items, so they are not forgotten. Newest decisions at the top.
 ## Traits not started
 
 - Creativity
-- Hubris
+- Hubris — scenario built (`hubris_larkspur`); scoring and controls next
 - Sycophancy
 - Instruction following (persistence + scope)
 
@@ -35,6 +35,5 @@ Each needs: scenario (multi-turn, 4–12 turns), 9-point scoring definition in
 
 - No `.gitignore`; `__pycache__/` is committed. Add one and untrack the caches.
 - `pytest` is not in `requirements.txt`.
-- `run.py` docstring mentions `scenarios/hubris_lookup`, which does not exist.
 - `examples/` logs predate the multi-turn scenarios; they show the old
   single-turn scripts.
