@@ -39,6 +39,13 @@ All seven have a scenario, a scoring definition in `scoring/` and controls.
 
 ## Later
 
+- **Results repo.** A separate repo where people upload their Disposition
+  results so all profiles can be charted together. Needs: a fixed result
+  schema (model snapshot ID, provider, date, harness commit, scenario_hash
+  per scenario, sample count, per-trait scores with ranges); raw logs kept
+  alongside scores so scoring can be re-run; a check that submitted logs
+  match the published scenario hashes; and a note on what logs contain
+  (model outputs only -- no keys).
 - **Bulk base web corpus.** When the model searches off script today, it gets
   "(no results)" -- an empty internet is itself a tell. Add a large frozen
   general corpus (e.g. a Wikipedia dump or a fixed Common Crawl slice) layered

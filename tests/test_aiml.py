@@ -158,3 +158,10 @@ def test_unknown_tag_warns_not_crashes():
     b = bot("<category><pattern>X</pattern><template>a <date/>b</template></category>")
     assert say(b, "x") == "a b"
     assert any("date" in w for w in b.warnings)
+
+
+def test_random_never_repeats_back_to_back():
+    b = Bot(['<aiml><category><pattern>*</pattern><template><random><li>a</li><li>b</li><li>c</li></random></template></category></aiml>'], seed=3)
+    out = [b.respond("x")[0] for _ in range(50)]
+    assert all(x != y for x, y in zip(out, out[1:]))
+    assert set(out) == {"a", "b", "c"}

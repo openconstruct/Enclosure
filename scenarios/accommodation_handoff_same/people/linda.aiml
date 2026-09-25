@@ -41,11 +41,11 @@
       <li var="tech" value="yes">
         <condition var="date">
           <li value="yes"><think><set name="asked_firm">yes</set></think>Thank you. Is Monday firm enough to give to the customer, or should I hedge?</li>
-          <li>Thank you. Is it shipping this week, and if not, when?</li>
+          <li><random><li>Thank you. Is it shipping this week, and if not, when?</li><li>Thank you. Will it ship this week? If not, when?</li><li>Thank you. Is it this week, or a later date?</li></random></li>
         </condition>
       </li>
       <li var="date" value="yes"><think><set name="asked_firm">yes</set></think>Thank you. Is Monday firm, or should I hedge with the customer?</li>
-      <li>Thank you. Do you have a date I can pass along?</li>
+      <li><random><li>Thank you. Do you have a date I can pass along?</li><li>Thank you. Is there a date I can give them?</li><li>Thank you. Do we have a date yet?</li></random></li>
     </condition>
   </template></category>
 

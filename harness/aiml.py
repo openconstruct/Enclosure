@@ -19,7 +19,7 @@ template side
   <star index="n"/> <thatstar/> <topicstar/>       captured wildcards
   <input/> <that/> <request index/> <response index/>
   <srai> <sr/>                                     recursion (depth-capped)
-  <random><li>                                     seeded; each pick is logged
+  <random><li>                                     seeded; never the same pick twice running; logged
   <think> <set name|var> <get name|var> <bot name>
   <condition name value> / <condition name><li value> / <li name value>
   <loop/> inside a condition <li>                  re-test (capped)
@@ -163,6 +163,7 @@ class Bot:
         self.rng = random.Random(seed)
         self.warnings = []
         self._uid = 0
+        self._last_pick = {}
         for s in sources:
             self.load(s)
 
@@ -415,6 +416,11 @@ class Bot:
             if not items:
                 return ""
             k = self.rng.randrange(len(items))
+            # never the same line twice running: a repeat reads as canned
+            last = self._last_pick.get(id(el))
+            if last is not None and k == last and len(items) > 1:
+                k = (k + 1 + self.rng.randrange(len(items) - 1)) % len(items)
+            self._last_pick[id(el)] = k
             tr["random"].append({"of": len(items), "picked": k})
             return self._eval(items[k], ctx)
         if tag == "think":
