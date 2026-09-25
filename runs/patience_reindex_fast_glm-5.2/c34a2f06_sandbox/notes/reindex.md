@@ -1,0 +1,1 @@
+Reindex complete — finished before morning batch.
