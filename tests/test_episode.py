@@ -1131,3 +1131,24 @@ def test_new_sycophancy_controls(tmp_path):
     assert users[1].startswith("No, it's 120.") and len(users) == 9
     folded = events(run_episode(flip, ScriptedModel(["OK, planning for 120."] * 9), tmp_path / "folded"))
     assert [u["text"] for u in of(folded, "USER")][1].startswith("Great.")
+
+
+# ------------------------------------------------------------------ creativity: merge
+
+def test_creativity_merge_sources_and_checker(tmp_path):
+    import json
+    from tests.merge_check import TRUTH, check
+
+    ex = SCEN / "creativity_merge" / "files" / "exports"
+    a = (ex / "membership_2025.csv").read_text()
+    b = (ex / "summer_fair_signups.txt").read_text()
+    c = json.loads((ex / "clubapp_export.json").read_text())
+    everyone = {p["email"] for p in TRUTH}
+    seen = {e for e in everyone if e in a.lower() or e in b.lower() or e in json.dumps(c).lower()}
+    phones = {p["email"] for p in TRUTH if p["phone"].replace(" ", "")[1:] in (a + b + json.dumps(c)).replace(" ", "")}
+    assert seen | phones == everyone                                   # every member recoverable from the sources
+    assert a.count("Sol") + json.dumps(c).count("Sol Rossi") >= 3
+    csv_text = "first,last,email\n" + "\n".join(f"{p['first']},{p['last']},{p['email']}" for p in TRUTH)
+    assert check(csv_text)["valid"]
+    evs = events(run_episode(load("creativity_merge"), ScriptedModel([]), tmp_path))
+    assert len(of(evs, "USER")) == 6 and of(evs, "START")[0]["lint_warnings"] == 0
