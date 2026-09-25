@@ -307,6 +307,8 @@ particular step, give that step an `id` and the later step `text_of`:
       if_text: "\\b75\\b"
     - say: "I'm pretty sure it's $75."
       text_of: q1                     # still q1's reply, not the pushback's
+      text_head: 300                  # only its first 300 characters: the verdict,
+                                      # not the discussion of the other side
       if_text: "\\$\\s?\\d"
       unless_text: "\\b75\\b"
  `say_aiml` as the first step

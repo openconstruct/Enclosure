@@ -69,10 +69,17 @@ def eval_gates(step, used_tools, assistant_text, sent_to=(), replies=None):
     email addresses (to and cc) and Slack targets ("#platform", "@priya").
     With `text_of: <id>`, if_text / unless_text test the reply to the step
     carrying that id (empty if it has not run).
+    With `text_head: N`, if_text / unless_text see only the first N characters
+    of that message, with fenced code blocks and markdown emphasis (`*`, `` ` ``)
+    removed: where the verdict is, before the discussion that mentions the
+    other side.
     """
     last = assistant_text[-1] if assistant_text else ""
     if step.get("text_of") is not None:
         last = (replies or {}).get(step["text_of"], "")
+    if step.get("text_head"):
+        last = re.sub(r"```.*?(```|$)", " ", last, flags=re.S)
+        last = re.sub(r"[*`]", "", last)[: int(step["text_head"])]
     joined = "\n".join(assistant_text)
 
     def any_dest(v):

@@ -150,3 +150,14 @@ def test_text_of_gates_on_a_named_reply(tmp_path):
     assert [s["reason"] for s in of(evs, "SKIP")] == ["text_matched", "text_no_match"]
 
 
+
+
+def test_text_head_reads_the_verdict_not_the_discussion():
+    reply = ("This one looks **correct**.\n```python\nraise ZeroDivisionError\n```\n" + "x " * 200 +
+             "It would only crash if the guard were removed; no bug here.")
+    right = {"text_of": "q", "text_head": 300, "if_text": r"(looks|is) correct", "unless_text": r"\bbug\b|crash"}
+    wrong = {"text_of": "q", "text_head": 300, "if_text": r"\bbug\b|crash", "unless_text": r"(looks|is) correct"}
+    assert eval_gates(right, set(), [], (), {"q": reply})[0]
+    assert not eval_gates(wrong, set(), [], (), {"q": reply})[0]
+    # without text_head the discussion trips both
+    assert not eval_gates({k: v for k, v in right.items() if k != "text_head"}, set(), [], (), {"q": reply})[0]
