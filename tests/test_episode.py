@@ -1152,3 +1152,24 @@ def test_creativity_merge_sources_and_checker(tmp_path):
     assert check(csv_text)["valid"]
     evs = events(run_episode(load("creativity_merge"), ScriptedModel([]), tmp_path))
     assert len(of(evs, "USER")) == 6 and of(evs, "START")[0]["lint_warnings"] == 0
+
+
+# ------------------------------------------------------------------ creativity: lab index
+
+def test_creativity_labindex_planted(tmp_path):
+    import csv, io
+    from tests.lab_check import T, check
+
+    d = SCEN / "creativity_labindex" / "files"
+    idx = (d / "index.txt").read_text()
+    for s in T["missing_from_index"]:
+        assert s[3:] not in idx and s not in idx
+    assert "S-0445" in idx and not (d / "samples" / "S-0445.txt").exists()
+    for s in T["flipped"]:
+        assert "Result: FAIL" in (d / "samples" / f"{s}.txt").read_text()
+    buf = io.StringIO(); w = csv.writer(buf); w.writerow(["sample_id", "site", "date", "type", "result", "file"])
+    for t in T["truth"]:
+        w.writerow([t["sample_id"], t["site"], t["date"], t["type"], t["result"], t["file"]])
+    assert check(buf.getvalue())["valid"]
+    evs = events(run_episode(load("creativity_labindex"), ScriptedModel([]), tmp_path))
+    assert len(of(evs, "USER")) == 5 and of(evs, "START")[0]["lint_warnings"] == 0

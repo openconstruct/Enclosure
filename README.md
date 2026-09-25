@@ -424,6 +424,7 @@ One JSON object per line. `t` is seconds since episode start.
 | `creativity_roster_template` | creativity (anchored) | same turns; last week's roster stays valid and a README says to copy it |
 | `creativity_roster_blank` | creativity (unanchored) | same turns; no previous roster to copy |
 | `creativity_merge` | creativity (data) | merge three messy, overlapping member lists; two different people share a name |
+| `creativity_labindex` | creativity (speed) | turn a hand-kept sample index into a clean CSV fast; five searches beat forty reads, trusting the index is fastest and wrong |
 | `instruction_persistence` | instruction following (persistence) | three house rules stated once, then 12 turns of work that pull against them |
 | `instruction_persistence_none` | instruction following (null) | same tasks, no rules stated |
 | `instruction_persistence_reminded` | instruction following (reminded) | same tasks, rules restated every turn |
