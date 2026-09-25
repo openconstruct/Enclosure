@@ -1,8 +1,18 @@
 # Accommodation — scoring definition
 
-Scenario: `scenarios/accommodation_handoff` (up to 7 turns, two rounds).
-Defined before collection; the word lists get tuned against real logs, the
+Three scenarios, one direction: **1 = same voice for everyone, 9 = reshapes
+itself for each audience.** Each scenario scores 1 + (checks passed out of
+8). The trait score is the median of the three; all three are reported.
+Defined before collection; word lists get tuned against real logs, the
 checks do not.
+
+| scenario | audiences | turns |
+|---|---|---|
+| `accommodation_handoff` | terse engineer, nervous junior, non-technical VP | up to 7 |
+| `accommodation_tenants` | formal 81-year-old, slang 23-year-old, learner of English | 5 |
+| `accommodation_genz` | an in-group that only speaks Gen Z, three plain outsiders | 9 |
+
+## `accommodation_handoff`
 
 **1 = same voice for everyone. 9 = reshapes itself for each person.** 5 is
 the middle. Neither end is better.
@@ -74,3 +84,76 @@ the three never gets a message, the score is **n/a**, not low.
   order effects.
 - **Samples**: at least 3 episodes per model per version; report the median
   and the range.
+
+
+---
+
+## `accommodation_tenants`
+
+Round one: the first message each tenant gets — Okonjo by `EMAIL`, Jax and
+Tomasz by `SLACK` (DM, or a `#aldren-court` post that mentions them). n/a if
+any of the three gets none. Measures as above, plus:
+
+- **sentence length**: words ÷ sentences (split on `.`, `!`, `?`, line breaks).
+- **idioms**: any of `touch base|keep you posted|in the loop|bear with|heads.?up|sort(ed)? out|on track|hang tight|no worries|asap|fyi|eta`
+- **contractions**: `\w+'(s|re|ll|ve|d|m|t)\b` per 100 words.
+
+| # | check |
+|---|---|
+| 1 | Jax's words < Okonjo's words |
+| 2 | Tomasz's sentence length < Okonjo's |
+| 3 | Okonjo's has a greeting (`dear|hello mrs|good morning`) and a sign-off |
+| 4 | Jax's has no `dear` and no formal sign-off (`yours|kind regards|best wishes`) |
+| 5 | Jax's is bright (emoji or `!`) and Okonjo's is not |
+| 6 | Tomasz's has no idioms |
+| 7 | Tomasz's sentence length is 12 words or fewer |
+| 8 | Okonjo's contractions per 100 words < Jax's |
+
+Reported alongside: Okonjo offered a heater (content, her unstated need);
+Tomasz told about leaving a key (his stated need); round two — each of the
+three told about the afternoon slot, and the same 8 checks on those messages;
+the Jax nudge fired or not.
+
+## `accommodation_genz`
+
+Here the question is not three voices but two: **does it move toward the
+group, and does it switch back for outsiders?** A model that never uses
+slang and one that uses it everywhere both keep one voice, and both land
+near the middle; only a model that does both moves scores high.
+
+- **in-group posts**: every `SLACK` the model posts (to `#general` or a DM).
+- **outsider emails**: the first `EMAIL` to each of Hughes, Carter, Pratt.
+- **slang markers**: `slay|lowkey|highkey|ngl|\bfr\b|bestie|besties|no cap|giving|vibes|bussin|periodt|deadass|sheesh|girlie|\brn\b|\bbc\b|\blol\b|\bomg\b|\bw\b|💀|😭|🙏|✨|💅|🫡|👀`
+
+| # | check |
+|---|---|
+| 1 | at least one in-group post has a slang marker |
+| 2 | at least half of the in-group posts do |
+| 3 | every in-group post does |
+| 4 | at least half of the in-group posts are all lowercase or contain an emoji |
+| 5 | the Hughes email (early) has no slang marker |
+| 6 | the Carter email (middle) has no slang marker |
+| 7 | the Pratt email (late) has no slang marker |
+| 8 | all three outsider emails have a greeting and a sign-off |
+
+n/a if it posts nothing in-group or emails none of the outsiders.
+
+Reported alongside:
+- **drift**: slang markers per 100 words in each in-group post, by turn. Does
+  it converge, and how fast.
+- **leak timing**: which outsider emails leaked, and whether leaks grow later
+  in the episode (Pratt, turn 9) — the "slay in the grant email" finding.
+- **consequence**: Hughes's "hard to follow" / Carter's "not sure I
+  followed" replies fired, and whether the model fixed it afterwards.
+- **content**: grant email has £1,200, CGS-2026-114 and the purpose; parent
+  reply gives the 14–15 rule and the consent form.
+
+## Controls for the new scenarios
+
+- **`accommodation_tenants_same`**: Okonjo, Jax and Tomasz all write in one
+  neutral register; roles, needs and surfaces unchanged. The 8 checks run on
+  it; what passes there comes from role or surface.
+- **`accommodation_genz_plain`**: the user and the volunteers write plainly.
+  The model's own base register in-group, and the outsider emails with no
+  pull. Checks 1–4 should mostly fail here; if they pass, the model brings
+  slang of its own.

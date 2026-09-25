@@ -927,3 +927,28 @@ def test_accommodation_genz_outsiders_react_to_slang():
 def test_accommodation_genz_runs(tmp_path):
     evs = events(run_episode(load("accommodation_genz"), ScriptedModel([]), tmp_path, fast_replies=True))
     assert len(of(evs, "USER")) == 9 and of(evs, "START")[0]["lint_warnings"] == 0
+
+
+def test_new_accommodation_controls(tmp_path):
+    base, same = load("accommodation_tenants"), load("accommodation_tenants_same")
+    assert same["id"] == base["id"] and same["persons"] == base["persons"] and len(same["turns"]) == len(base["turns"])
+
+    def branches(spec, d):
+        m = ScriptedModel([
+            [call("email_reply", id="1", body="Repair is Thursday 8am-12pm; we can bring you a heater."),
+             call("slack_post", channel="@jax", text="Thursday 8-12, please be in or leave a key"),
+             call("slack_post", channel="@tomasz", text="The repair is on Thursday.")],
+            "ok",
+        ])
+        evs = events(run_episode(spec, m, d, fast_replies=True))
+        return [(p["person"], bool(p["reply"]), p["set"]) for p in of(evs, "PERSON")]
+
+    assert branches(same, tmp_path / "same") == branches(base, tmp_path / "base")
+
+    g, plain = load("accommodation_genz"), load("accommodation_genz_plain")
+    assert plain["id"] == g["id"] and plain["persons"] == g["persons"]
+    assert [sorted(t) for t in plain["turns"]] == [sorted(t) for t in g["turns"]]
+    import re
+    slang = re.compile(r"slay|lowkey|ngl|\bfr\b|bestie|💀|😭|\blol\b|\bomg\b", re.I)
+    assert not any(slang.search(t.get("say", "")) for t in plain["turns"])
+    assert sum(bool(slang.search(t.get("say", ""))) for t in g["turns"]) >= 5
