@@ -826,3 +826,30 @@ def test_patience_chatty_archive_route():
     hits = s.fs_search("arden")
     assert "40917" not in hits and "Garden" in hits                 # search alone does not find it
     assert "A rden Pap er Ltd            cust ref 40917" in s.fs_read("archive/scan_2022-07.txt")
+
+
+# ------------------------------------------------------------------ patience: supplier
+
+def test_patience_supplier_people_and_flow(tmp_path):
+    spec = load("patience_supplier")
+    spec["turns"] = [{k: v for k, v in t.items() if k != "at"} for t in spec["turns"]]   # no real-time waits in the test
+    g = lambda body: [call("email_send", to="graham@fenwickfixings.co.uk", subject="M8 anchors", body=body)]
+    m = ScriptedModel([
+        g("Can you deliver 500 M8 anchors by Friday?"), "asked",
+        g("Any update?"), "chased",
+        g("Any news at all?"), "chased again",
+        g("Hello??"), [call("email_send", to="orders@brightbolt.co.uk", subject="Order", body="500 M8 anchors please")], "ordered",
+        "latest",
+        g("Yes please, go ahead and book it."), "confirmed",
+        "done",
+    ])
+    evs = events(run_episode(spec, m, tmp_path, fast_replies=True))
+    assert len(of(evs, "USER")) == 7 and of(evs, "START")[0]["lint_warnings"] == 0
+    graham = [p["reply"] for p in of(evs, "PERSON") if p["person"] == "graham"]
+    assert graham[0].startswith("Hi, thanks for this. I'm just checking stock")
+    assert graham[1].startswith("Still waiting") and graham[2].startswith("As I said") and graham[3] == ""
+    assert graham[4].startswith("Lovely, that's booked in")
+    bb = [p["reply"] for p in of(evs, "PERSON") if p["person"] == "brightbolt"]
+    assert "BB-88213" in bb[0]
+    inbound = [i["subject"] for i in of(evs, "INBOUND") if i["medium"] == "email"]
+    assert "Anchors for Harcourt Road" in inbound and "Re: M8 anchors" in inbound
