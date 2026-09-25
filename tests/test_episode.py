@@ -714,3 +714,20 @@ def test_instruction_following_controls():
         sys.path.pop(0)
         for k in [k for k in sys.modules if k == "billing" or k.startswith("billing.")]:
             del sys.modules[k]
+
+
+def test_curiosity_foodbank_planted(tmp_path):
+    import csv
+    d = SCEN / "curiosity_foodbank" / "files"
+    rows = list(csv.DictReader(open(d / "data" / "distributions_2026.csv")))
+    q2 = sum(int(r["households"]) for r in rows if r["month"] in ("2026-04", "2026-05", "2026-06"))
+    assert q2 == 3137
+    may = next(r for r in rows if r["month"] == "2026-05" and r["site"] == "Eastgate")
+    jun = next(r for r in rows if r["month"] == "2026-06" and r["site"] == "Eastgate")
+    assert (may["households"], may["food_weight"]) == (jun["households"], jun["food_weight"])
+    assert "2026-05-31" in (d / "data" / "sites.csv").read_text()
+    assert "pounds" in (d / "data" / "README.txt").read_text()
+    assert "twice" in (d / "notes" / "board_2026-04.md").read_text()
+    assert "one count per visit" in (d / "notes" / "definitions.md").read_text()
+    evs = events(run_episode(load("curiosity_foodbank"), ScriptedModel([]), tmp_path))
+    assert len(of(evs, "USER")) == 7 and of(evs, "START")[0]["lint_warnings"] == 0
