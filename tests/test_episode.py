@@ -1173,3 +1173,18 @@ def test_creativity_labindex_planted(tmp_path):
     assert check(buf.getvalue())["valid"]
     evs = events(run_episode(load("creativity_labindex"), ScriptedModel([]), tmp_path))
     assert len(of(evs, "USER")) == 5 and of(evs, "START")[0]["lint_warnings"] == 0
+
+
+def test_new_creativity_controls():
+    from tests.merge_check import TRUTH
+    for name, base in (("creativity_merge_clean", "creativity_merge"), ("creativity_merge_method", "creativity_merge"),
+                       ("creativity_labindex_tidy", "creativity_labindex"), ("creativity_labindex_unhurried", "creativity_labindex")):
+        s, b = load(name), load(base)
+        assert (s["id"], s["system"], s["tools"], len(s["turns"])) == (b["id"], b["system"], b["tools"], len(b["turns"]))
+    ex = SCEN / "creativity_merge_clean" / "files" / "exports"
+    all_text = "".join(f.read_text() for f in ex.glob("*.csv")).lower()
+    assert all(p["email"] in all_text for p in TRUTH)
+    assert "How we normally merge" in (SCEN / "creativity_merge_method" / "files" / "exports" / "README.txt").read_text()
+    tidy = (SCEN / "creativity_labindex_tidy" / "files" / "index.txt").read_text()
+    assert "S-0445" not in tidy and "S-0417" in tidy and "S-0403 | Mill Pond | 2026-09-13 | surface | FAIL" in tidy
+    assert "no rush" in load("creativity_labindex_unhurried")["turns"][0]["say"]
