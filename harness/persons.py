@@ -188,7 +188,8 @@ class Cast:
             delay = person.next_delay()
             if self.fast:
                 delay = 0.0
-        due = round(self.now() + delay, 3)
+        # round down: rounding up could leave an instant reply briefly in the future
+        due = math.floor((self.now() + delay) * 1000) / 1000
         if self.log is not None:
             self.log.write(
                 "PERSON",
