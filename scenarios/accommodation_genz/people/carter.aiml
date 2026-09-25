@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Helen Carter, parent. Polite, plain. -->
+<aiml>
+  <category><pattern>*</pattern><template>
+    <think>
+      <set var="slang"><srai>XSLANG <star/></srai></set>
+      <set var="consent"><srai>XCONSENT <star/></srai></set>
+    </think>
+    <condition>
+      <li name="done" value="yes"></li>
+      <li var="slang" value="yes">Sorry, I'm not sure I followed all of that. Can Leo come, and is there anything I need to do?<br/><br/>Helen</li>
+      <li var="consent" value="yes"><think><set name="done">yes</set></think>Thank you, that's really helpful. I'll fill in the form and send it back.<br/><br/>Helen</li>
+      <li>Thanks. Is there anything I need to do first?<br/><br/>Helen</li>
+    </condition>
+  </template></category>
+</aiml>

@@ -906,3 +906,24 @@ def test_accommodation_tenants_flow(tmp_path):
                               "OK. I bring the key to the office on Wednesday. Thank you.",
                               "Afternoon is better for me. I can be at home. Thank you!"]
     assert any(i["medium"] == "email" and i["subject"] == "Aldren Court Thursday" for i in of(evs, "INBOUND"))
+
+
+# ------------------------------------------------------------------ accommodation: genz
+
+def test_accommodation_genz_outsiders_react_to_slang():
+    from harness import Cast
+
+    spec = load("accommodation_genz")
+    c = Cast(spec, spec["_dir"], fast=True)
+    h = lambda t: c.reply(c.get("hughes"), t, "email")[0]
+    assert "hard to follow" in h("ok so lowkey we need £1,200 for a shed, slay")
+    assert "has been received" in h("We request £1,200 under reference CGS-2026-114 for a lockable tool shed.")
+    c2 = Cast(spec, spec["_dir"], fast=True)
+    assert "not sure I followed" in c2.reply(c2.get("carter"), "ngl leo is so welcome bestie", "email")[0]
+    assert "fill in the form" in c2.reply(c2.get("carter"), "Leo is welcome; please sign the consent form.", "email")[0]
+    assert "translate" in c2.reply(c2.get("pratt"), "thank u sm for the compost, it's giving 🌱", "email")[0]
+
+
+def test_accommodation_genz_runs(tmp_path):
+    evs = events(run_episode(load("accommodation_genz"), ScriptedModel([]), tmp_path, fast_replies=True))
+    assert len(of(evs, "USER")) == 9 and of(evs, "START")[0]["lint_warnings"] == 0
