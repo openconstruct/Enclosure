@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   Linda Hale, VP Customer Operations. Not technical. Emailed. Wants one thing
-  she can forward to a customer, and whether the date will hold.
+  she can forward to a customer, and whether the date will hold. When the date
+  slips again to Wednesday she has to walk back what she told the customer.
 -->
 <aiml>
   <category><pattern>*</pattern><template>
@@ -10,8 +11,24 @@
       <set var="tech"><srai>XTECH <star/></srai></set>
       <set var="firm"><srai>XFIRM <star/></srai></set>
       <set var="hedge"><srai>XHEDGE <star/></srai></set>
+      <set var="wed"><srai>XWED <star/></srai></set>
     </think>
     <condition>
+      <li name="done2" value="yes"></li>
+      <li name="stage" value="correcting">
+        <think><set name="done2">yes</set></think>
+        <condition>
+          <li var="hedge" value="yes">Thank you. I'll send that on and keep it tentative this time.<br/><br/>Linda</li>
+          <li>Thanks, I'll send that on.<br/><br/>Linda</li>
+        </condition>
+      </li>
+      <li var="wed" value="yes">
+        <think><set name="stage">correcting</set></think>
+        <condition>
+          <li name="done" value="yes">Oh no. I already told Harrow &amp; Finch it was Monday. What happened? I need a couple of sentences I can send them to correct it -- they're planning their month-end close around this.<br/><br/>Linda</li>
+          <li>Thanks. So it's Wednesday the 30th now? Can I give the customer that date?<br/><br/>Linda</li>
+        </condition>
+      </li>
       <li name="done" value="yes"></li>
       <li name="asked_firm" value="yes">
         <think><set name="done">yes</set></think>

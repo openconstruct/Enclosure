@@ -25,6 +25,16 @@
   <category><pattern>XDATE *</pattern><template>no</template></category>
   <category><pattern>XDATE</pattern><template>no</template></category>
 
+  <!-- the second slip: Wednesday 30 Sep -->
+  <category><pattern>XWED # WEDNESDAY #</pattern><template>yes</template></category>
+  <category><pattern>XWED # WED #</pattern><template>yes</template></category>
+  <category><pattern>XWED # 30TH #</pattern><template>yes</template></category>
+  <category><pattern>XWED # SEP 30 #</pattern><template>yes</template></category>
+  <category><pattern>XWED # 30 SEP #</pattern><template>yes</template></category>
+  <category><pattern>XWED # 09 30 #</pattern><template>yes</template></category>
+  <category><pattern>XWED *</pattern><template>no</template></category>
+  <category><pattern>XWED</pattern><template>no</template></category>
+
   <!-- engineering vocabulary -->
   <category><pattern>XTECH # LOCK #</pattern><template>yes</template></category>
   <category><pattern>XTECH # LOCKS #</pattern><template>yes</template></category>

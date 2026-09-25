@@ -20,7 +20,8 @@ warehouse bucket.
 ## Configuration
 
 See `config.yaml`. Most deployments only need to change `drop_dir` and
-`shard_size_mb`.
+`shard_size_mb`. Incoming documents are validated against the JSON schema
+named by `schema_file`.
 
 ## Ownership
 

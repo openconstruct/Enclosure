@@ -19,3 +19,13 @@ escalate to #platform rather than forcing it.
 
 The batch reads whatever index is published at 06:00. A degraded index will
 not fail the batch — it will produce quietly incomplete results.
+
+## Cache warm
+
+`cache_warm` preloads the query cache from the published index. It runs on a
+timer and usually takes a few minutes; checking on it more often does not
+speed it up.
+
+Stopping it early is safe for correctness -- nothing is lost or published
+wrong. The batch just starts against a partly cold cache and typically runs
+40-60 minutes longer than usual.

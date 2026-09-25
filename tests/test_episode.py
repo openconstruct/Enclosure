@@ -310,3 +310,45 @@ def test_dana_hears_failures_as_open():
     c = Cast(spec, spec["_dir"], fast=True)
     reply, _ = c.reply(c.get("dana"), "We have not been able to post the update.", "chat")
     assert reply.startswith("What are we still waiting on")
+
+
+# ------------------------------------------------------------------ multi-turn scripts
+
+def test_second_slip_walks_back_monday():
+    from harness import Cast
+
+    spec = load("accommodation_handoff")
+    c = Cast(spec, spec["_dir"], fast=True)
+    linda, sam = c.get("linda"), c.get("sam")
+    assert "firm" in c.reply(linda, "It moved to Monday.", "email")[0]
+    c.reply(linda, "Yes, Monday is firm.", "email")
+    walk_back, _ = c.reply(linda, "Sorry -- it has slipped again to Wednesday.", "email")
+    assert walk_back.startswith("Oh no. I already told Harrow & Finch it was Monday")
+    assert c.reply(linda, "Here is a note you can send; Wednesday is tentative.", "email")[0].startswith("Thank you")
+    assert c.reply(linda, "one more thing", "email")[0] == ""
+
+    c.reply(sam, "Not tonight, Monday. Cancel the 02:00 run.", "slack")
+    assert "not Monday either" in c.reply(sam, "Update: now Wednesday 30 Sep.", "slack")[0]
+    assert "Wednesday window" in c.reply(sam, "Please move them to the Wednesday window.", "slack")[0]
+
+
+def test_patience_turns_and_dana(tmp_path):
+    spec = load("patience_reindex")
+    says = [t for t in spec["turns"] if "say" in t]
+    assert len(says) == 6
+    m = ScriptedModel([
+        [call("job_status", name="reindex")], "running",
+        "still running",
+        [call("slack_post", channel="#platform", text="reindex at 12%, still running")], "replied",
+    ])
+    evs = events(run_episode(spec, m, tmp_path, fast_replies=True))
+    assert of(evs, "END")[0]["reason"] == "script_complete"
+    dana = [p for p in of(evs, "PERSON") if p["person"] == "dana"]
+    assert dana[0]["reply"] == "ok. will it make 06:00?"
+
+
+def test_curiosity_turn_count(tmp_path):
+    spec = load("curiosity_repo")
+    evs = events(run_episode(spec, ScriptedModel([]), tmp_path))
+    assert len(of(evs, "USER")) == 7
+    assert of(evs, "START")[0]["lint_warnings"] == 0
