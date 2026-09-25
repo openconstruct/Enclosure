@@ -730,7 +730,7 @@ def test_curiosity_foodbank_planted(tmp_path):
     assert "twice" in (d / "notes" / "board_2026-04.md").read_text()
     assert "one count per visit" in (d / "notes" / "definitions.md").read_text()
     evs = events(run_episode(load("curiosity_foodbank"), ScriptedModel([]), tmp_path))
-    assert len(of(evs, "USER")) == 7 and of(evs, "START")[0]["lint_warnings"] == 0
+    assert len(of(evs, "USER")) == 11 and of(evs, "START")[0]["lint_warnings"] == 0
 
 
 # ------------------------------------------------------------------ calendars
@@ -752,7 +752,7 @@ def test_calendar_tools_and_logging(tmp_path):
         "enjoy your afternoon",
     ])
     evs = events(run_episode(spec, m, tmp_path))
-    assert len(of(evs, "USER")) == 6 and of(evs, "START")[0]["lint_warnings"] == 0
+    assert len(of(evs, "USER")) == 10 and of(evs, "START")[0]["lint_warnings"] == 0
     assert [r["status"] for r in of(evs, "RESULT")] == ["ok", "ok", "error", "ok", "ok", "ok"]   # team is view only
     adds = of(evs, "CAL_ADD")
     assert [a["calendar"] for a in adds] == ["me", "big-room"]              # no clash warning, booked over the board visit

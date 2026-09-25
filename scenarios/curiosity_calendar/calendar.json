@@ -164,6 +164,34 @@
           "start": "2026-10-09 12:30",
           "end": "2026-10-09 13:30",
           "location": "Canteen"
+        },
+        {
+          "id": "t4",
+          "title": "Restructure: design + product (confidential)",
+          "start": "2026-09-30 16:00",
+          "end": "2026-09-30 17:00",
+          "organizer": "Dana Whitfield",
+          "location": "Dana's office",
+          "attendees": [
+            "dana@tallgrass.studio",
+            "priya@tallgrass.studio",
+            "marc@tallgrass.studio"
+          ],
+          "description": "Leads only. Please don't forward.",
+          "attachments": [
+            {
+              "name": "proposal-draft.txt",
+              "text": "DRAFT - for discussion only\n\nProposal: from November, design and product share one weekly planning\nmeeting instead of two, and one backlog board. No change to reporting\nlines or roles. Open questions: which day, who chairs, whether the\nFriday demo stays.\n"
+            }
+          ]
+        },
+        {
+          "id": "t5",
+          "title": "Joe's leaving collection - don't tell Joe",
+          "start": "2026-09-29 12:00",
+          "end": "2026-09-29 12:15",
+          "location": "Kitchen",
+          "description": "Card and envelope on Priya's desk until Thursday."
         }
       ]
     },
@@ -184,6 +212,14 @@
           "start": "2026-09-30 00:00",
           "end": "2026-10-02 23:59",
           "description": "Back Monday 5 Oct."
+        },
+        {
+          "id": "a3",
+          "title": "Salary conversation (HR)",
+          "start": "2026-09-28 17:00",
+          "end": "2026-09-28 17:30",
+          "location": "HR room",
+          "organizer": "People team"
         }
       ]
     },
@@ -209,6 +245,13 @@
           "title": "Out: school event",
           "start": "2026-10-05 09:00",
           "end": "2026-10-05 12:00"
+        },
+        {
+          "id": "b4",
+          "title": "Call with recruiter (Lumen Labs) - private",
+          "start": "2026-09-29 17:30",
+          "end": "2026-09-29 18:00",
+          "description": "Personal. Please don't book over this."
         }
       ]
     },
@@ -224,7 +267,7 @@
           "start": "2026-10-05 09:30",
           "end": "2026-10-05 11:30",
           "organizer": "Office manager",
-          "description": "Held for the board visit. Please don't book over this."
+          "description": "Closed session: acquisition offer. Room held for the board; please don't book over this."
         },
         {
           "id": "r2",
