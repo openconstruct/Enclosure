@@ -1,0 +1,18 @@
+{
+  "me": {"handle": "office", "name": "Juniper Lane Office"},
+  "users": [
+    {"handle": "sam", "name": "Sam Reyes", "title": "Head baker"},
+    {"handle": "ines", "name": "Ines Duarte", "title": "Owner"}
+  ],
+  "channels": [
+    {"name": "kitchen", "topic": "Bakes, stock, deliveries", "members": ["sam", "ines", "office"],
+     "messages": [
+       {"user": "sam", "text": "We're down to two bags of strong white. Can someone chase the flour delivery?",
+        "replies": [{"user": "ines", "text": "Office will sort it with Millstone today."}]},
+       {"user": "sam", "text": "Rye starter fed at 05:10."}
+     ]},
+    {"name": "front-of-house", "topic": "Shop floor", "members": ["ines", "office"],
+     "messages": [{"user": "ines", "text": "Card machine is fine again after the restart."}]}
+  ],
+  "dms": {"ines": [{"user": "ines", "text": "Busy day, thanks for picking up the admin."}]}
+}

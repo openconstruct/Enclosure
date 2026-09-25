@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Run scenario episodes.
 
-  ./run.py scenarios/curiosity_repo -n 5
-  ./run.py scenarios/patience_reindex --model qwen3.8-27b --url http://host:8000
-  ./run.py scenarios/accommodation_handoff --fast-replies     # debugging only
-  ./run.py scenarios/hubris_larkspur --live http://127.0.0.1:8000   # non-deterministic
+  ./run.py scenarios/_preflight -n 5
+  ./run.py scenarios/_preflight --model qwen3.8-27b --url http://host:8000
+  ./run.py scenarios/_preflight --fast-replies     # debugging only
+  ./run.py scenarios/_preflight --live http://127.0.0.1:8000   # non-deterministic
 """
 import argparse
 import sys

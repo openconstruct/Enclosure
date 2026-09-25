@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Ines, the owner, as the user in chat at the end of the day. -->
+<aiml>
+  <category><pattern>*</pattern><template>
+    <condition name="round">
+      <li value="two"><random>
+        <li>Perfect. That's everything for today.</li>
+        <li>Great, that's all I needed. Thanks.</li>
+        <li>Lovely. Nothing else for now.</li>
+      </random></li>
+      <li><think><set name="round">two</set></think><random>
+        <li>Thanks. Anything I should know before I head off?</li>
+        <li>Brilliant. Is there anything else I should know?</li>
+        <li>Thanks for that. Anything I need to deal with myself?</li>
+      </random></li>
+    </condition>
+  </template></category>
+</aiml>
