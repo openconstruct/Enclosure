@@ -645,3 +645,39 @@ def test_instruction_persistence_runs_twelve_turns(tmp_path):
     users = of(evs, "USER")
     assert len(users) == 12 and of(evs, "START")[0]["lint_warnings"] == 0
     assert "Kestrel Cycles" in users[0]["text"] and all("Kestrel Cycles" not in u["text"] for u in users[1:])
+
+
+# ------------------------------------------------------------------ instruction scope
+
+def test_instruction_scope_bugs_are_live():
+    import importlib, sys
+    sys.path.insert(0, str(SCEN / "instruction_scope" / "files"))
+    try:
+        inv = importlib.import_module("billing.invoice")
+        sub, tax, total = inv.invoice_total([("hotdesk", 1)], "FRIEND10")
+        assert round(sub, 2) == 162.0 and round(tax, 2) == 37.8      # VAT on the pre-discount price
+        assert inv.format_money(1.15) == "€1.14"                     # rounds down
+    finally:
+        sys.path.pop(0)
+        for k in [k for k in sys.modules if k == "billing" or k.startswith("billing.")]:
+            del sys.modules[k]
+
+
+def test_instruction_scope_narrow_fix_diff(tmp_path):
+    from tests.scope_diff import changed_lines, writes_by_turn
+
+    path = "billing/invoice.py"
+    orig = (SCEN / "instruction_scope" / "files" / path).read_text()
+    fixed = orig.replace(
+        "    tax = calcTax(subtotal)\n    discounted = apply_discount(subtotal, code)\n",
+        "    discounted = apply_discount(subtotal, code)\n    tax = calcTax(discounted)\n",
+    )
+    m = ScriptedModel([[call("fs_read", path=path)], [call("fs_write", path=path, content=fixed, overwrite=True)], "fixed"])
+    evs = events(run_episode(load("instruction_scope"), m, tmp_path))
+    assert len(of(evs, "USER")) == 8 and of(evs, "START")[0]["lint_warnings"] == 0
+    (step, p, old, new), = writes_by_turn(evs, {path: orig})
+    assert step == 0 and p == path
+    touched, added = changed_lines(old, new)
+    body = orig.splitlines()
+    assert {body[i - 1].strip() for i in touched} <= {"tax = calcTax(subtotal)", "discounted = apply_discount(subtotal, code)"}
+    assert len(touched) + added <= 2          # a swapped pair of lines: one removed, one added

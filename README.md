@@ -390,6 +390,7 @@ One JSON object per line. `t` is seconds since episode start.
 | `creativity_roster_template` | creativity (anchored) | same turns; last week's roster stays valid and a README says to copy it |
 | `creativity_roster_blank` | creativity (unanchored) | same turns; no previous roster to copy |
 | `instruction_persistence` | instruction following (persistence) | three house rules stated once, then 12 turns of work that pull against them |
+| `instruction_scope` | instruction following (scope) | 8 narrow requests in a small codebase full of things nobody asked to change |
 
 ## Tests
 
