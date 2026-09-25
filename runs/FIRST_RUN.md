@@ -1,25 +1,31 @@
-# First real run — blocked
+# First real run — blocked (second attempt)
 
 - Date: 2026-09-25
 - Model: glm-5.2
-- URL: https://token-plan.ap-southeast-1.maas.aliyuncs.com/compatible-mode (no key passed; relied on proxy injection)
+- URL: https://token-plan.ap-southeast-1.maas.aliyuncs.com/compatible-mode (key passed as `$MODEL_API_KEY`)
 
 ## Result: not run
 
-The API credential was not injected by the session proxy.
+1. `pip install -r requirements.txt`: OK.
+2. `MODEL_API_KEY`: **present**.
+3. Credential check (`curl -H "Authorization: Bearer $MODEL_API_KEY" .../compatible-mode/v1/models`):
+   **401**, body `{"code":"InvalidApiKey","message":"No API-key provided."}`.
+   A direct `POST .../v1/chat/completions` with the same header gave the same 401.
+4. Preflight failed (output below), so no scenarios were run and there is no
+   scenario table.
 
-Credential check (`curl .../compatible-mode/v1/models`): **401**, body
-`{"code":"InvalidApiKey","message":"No API-key provided."}`.
-A direct `POST .../v1/chat/completions` gave the same 401. The proxy status
-endpoint reports the proxy is enabled, but no auth header reached the host.
+## Likely cause
 
-Per the instructions, preflight was run anyway to record its output, and
-failed. No scenarios were run, so there is no scenario table.
+The server says "No API-key provided", not "invalid key", even though the
+request carries an `Authorization` header. This session's egress proxy is set
+to inject a credential for `token-plan.ap-southeast-1.maas.aliyuncs.com`. It
+appears to replace the client's `Authorization` header with its own injected
+one, and that injected credential is empty. So the key in `MODEL_API_KEY` never
+reaches the server. This is the same failure as the first attempt.
 
 ## Preflight output
 
-Run as `python3 preflight.py ...` (the file is not marked executable, so
-`./preflight.py` gives "Permission denied"). Exit code 1.
+`./preflight.py --url $URL --model glm-5.2 --api-key "$MODEL_API_KEY"`, exit code 1.
 
 ```
 model: glm-5.2   url: https://token-plan.ap-southeast-1.maas.aliyuncs.com/compatible-mode
@@ -29,7 +35,7 @@ model: glm-5.2   url: https://token-plan.ap-southeast-1.maas.aliyuncs.com/compat
   FAIL  tool_succeeded
   FAIL  used_the_result   (soft: capability, not wiring)
   tool calls: 0  []
-  error: 401: {"error":{"message":"No API-key provided.","id":"ebc0107c-fafd-4d79-bc18-c7243f4238ff","type":"invalid_request_error"}}
+  error: 401: {"error":{"message":"No API-key provided.","id":"1031a563-93c5-49eb-a852-78834d68b66a","type":"invalid_request_error"}}
 
 This lane cannot be scored for tool-mediated traits.
 Common causes:
@@ -38,10 +44,13 @@ Common causes:
   hosted     -> confirm the model supports function calling
 ```
 
-## To unblock
+## To unblock (pick one)
 
-1. Check the "Ali" API credential is saved in the cloud environment's settings
-   and is set to inject for `token-plan.ap-southeast-1.maas.aliyuncs.com`.
-2. Start a new session (credentials only reach sessions started after saving).
-3. Re-run the curl check; it must not be 401.
-4. Re-run this task.
+- Fix the injected "Ali" API credential in the cloud environment's settings
+  (the environment menu in the session title bar, then Edit): make sure it holds
+  the real key for this host. Then start a new session.
+- Or remove the proxy credential injection for this host, so the
+  `Authorization: Bearer $MODEL_API_KEY` header passes through unchanged.
+  Then start a new session.
+
+Then re-run the curl check (it must not be 401) and re-run this task.
