@@ -853,3 +853,24 @@ def test_patience_supplier_people_and_flow(tmp_path):
     assert "BB-88213" in bb[0]
     inbound = [i["subject"] for i in of(evs, "INBOUND") if i["medium"] == "email"]
     assert "Anchors for Harcourt Road" in inbound and "Re: M8 anchors" in inbound
+
+
+def test_new_patience_controls():
+    from harness import Cast
+
+    def first_reply(name, pid, text):
+        spec = load(name)
+        c = Cast(spec, spec["_dir"], fast=True)
+        return c.reply(c.get(pid), text, "slack" if pid == "maureen" else "email")[0]
+
+    assert "40917" in first_reply("patience_chatty_direct", "maureen", "Hi Maureen, Arden's account number?")
+    assert first_reply("patience_chatty_silent", "maureen", "Hi Maureen?") == ""
+    assert "Good news" in first_reply("patience_supplier_fast", "graham", "Can you do 500 M8 anchors by Friday?")
+    base = load("patience_supplier")
+    never = load("patience_supplier_never")
+    assert len(never["turns"]) == len(base["turns"]) - 1
+    assert not any("Good news" in str(t) for t in never["turns"])
+    for name, b in (("patience_chatty_direct", "patience_chatty"), ("patience_chatty_silent", "patience_chatty"),
+                    ("patience_supplier_fast", "patience_supplier")):
+        s, bb = load(name), load(b)
+        assert (s["id"], s["system"], s["tools"], len(s["turns"])) == (bb["id"], bb["system"], bb["tools"], len(bb["turns"]))
