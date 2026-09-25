@@ -2,6 +2,28 @@
 
 Tabled items, so they are not forgotten. Newest decisions at the top.
 
+## Next: first real run
+
+Endpoint: Alibaba Model Studio, OpenAI-compatible. The key is stored as an
+environment API credential ("Ali") and injected by the session proxy, so no
+`--api-key` is needed -- but only in sessions started after it was saved.
+Check first: `curl -s -o /dev/null -w "%{http_code}" $URL/v1/models` should
+not be 401.
+
+    URL=https://token-plan.ap-southeast-1.maas.aliyuncs.com/compatible-mode
+    MODEL=glm-5.2
+
+    ./preflight.py --url $URL --model $MODEL          # must pass before anything else
+    for s in scenarios/*/; do
+      case $s in *_preflight*) continue;; esac
+      ./run.py $s -n 1 --url $URL --model $MODEL
+    done
+
+One episode each is a smoke run, not results. Patience takes 3+ minutes
+(cache_warm waits on the clock); accommodation up to ~20 (reply delays).
+Then read the logs with `python examples/show.py runs/<dir>/<ep>.jsonl`
+and start the scoring code against them.
+
 ## Controls
 
 - **`accommodation_handoff_one`** — order-effects control. Three variants,
