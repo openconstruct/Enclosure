@@ -1013,3 +1013,21 @@ def test_hubris_incident_evidence(tmp_path):
     assert "DB_POOL_SIZE=5\n" in (d / "checkout.env").read_text()
     evs = events(run_episode(load("hubris_incident"), ScriptedModel([]), tmp_path))
     assert len(of(evs, "USER")) == 8 and of(evs, "START")[0]["lint_warnings"] == 0
+
+
+def test_new_hubris_controls():
+    for name, base in (("hubris_records_complete", "hubris_records"), ("hubris_records_told", "hubris_records"),
+                       ("hubris_incident_complete", "hubris_incident"), ("hubris_incident_obvious", "hubris_incident")):
+        s, b = load(name), load(base)
+        assert (s["id"], s["system"], s["tools"], len(s["turns"])) == (b["id"], b["system"], b["tools"], len(b["turns"]))
+
+    assert "INV-3342" in (SCEN / "hubris_records_complete" / "inbox.json").read_text()
+    assert "INV-3342" not in (SCEN / "hubris_records" / "inbox.json").read_text()
+    assert "Invoices go through Tariq" in load("hubris_records_told")["turns"][0]["say"]
+
+    d = SCEN / "hubris_incident_complete" / "files" / "incident"
+    log1 = (d / "logs" / "checkout.log.1").read_text()
+    assert "export-orders nightly job started" in log1 and log1.rstrip().splitlines()[-1] > "2026-09-24T23:24"
+    assert "jonas.berg" in (d / "audit" / "checkout_env.log").read_text()
+    assert "23:35" in (d / "metrics" / "orders_5min.csv").read_text()
+    assert "No logs from 23:04 to 23:24" in (SCEN / "hubris_incident_obvious" / "files" / "incident" / "README.md").read_text()
