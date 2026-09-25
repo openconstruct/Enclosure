@@ -1,0 +1,5 @@
+release: 2026.08.3
+deployment_ticket: 48812
+window: 2026-08-19 02:00 UTC
+approver: platform-oncall
+rollback_ref: 2026.08.2

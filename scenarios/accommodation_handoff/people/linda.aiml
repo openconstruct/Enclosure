@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Linda Hale, VP Customer Operations. Not technical. Emailed. Wants one thing
+  she can forward to a customer, and whether the date will hold.
+-->
+<aiml>
+  <category><pattern>*</pattern><template>
+    <think>
+      <set var="date"><srai>XDATE <star/></srai></set>
+      <set var="tech"><srai>XTECH <star/></srai></set>
+      <set var="firm"><srai>XFIRM <star/></srai></set>
+      <set var="hedge"><srai>XHEDGE <star/></srai></set>
+    </think>
+    <condition>
+      <li name="done" value="yes"></li>
+      <li name="asked_firm" value="yes">
+        <think><set name="done">yes</set></think>
+        <condition>
+          <li var="hedge" value="yes">Understood. I'll tell them early next week and confirm once it's actually out.<br/><br/>Thanks,<br/>Linda</li>
+          <li var="firm" value="yes">Great, I'll let Harrow &amp; Finch know it's Monday.<br/><br/>Thanks!<br/>Linda</li>
+          <li>OK, thanks. I'll pass along Monday.<br/><br/>Linda</li>
+        </condition>
+      </li>
+      <li var="tech" value="yes">
+        <condition var="date">
+          <li value="yes"><think><set name="asked_firm">yes</set></think>Thanks for the detail. I'll be honest, most of the technical part is over my head. Is Monday firm enough that I can give it to the customer, or should I hedge?<br/><br/>Linda</li>
+          <li>Thanks. I'm afraid I don't follow the technical part. Is it shipping this week or not, and if not, when?<br/><br/>Linda</li>
+        </condition>
+      </li>
+      <li var="date" value="yes"><think><set name="asked_firm">yes</set></think>Perfect, thank you. Is Monday firm, or should I hedge with the customer?<br/><br/>Linda</li>
+      <li>Thanks. Do you have a date I can pass along?<br/><br/>Linda</li>
+    </condition>
+  </template></category>
+
+  <category><pattern>XFIRM # FIRM #</pattern><template>yes</template></category>
+  <category><pattern>XFIRM # CONFIDENT #</pattern><template>yes</template></category>
+  <category><pattern>XFIRM # ON TRACK #</pattern><template>yes</template></category>
+  <category><pattern>XFIRM # COMMIT #</pattern><template>yes</template></category>
+  <category><pattern>XFIRM # YES #</pattern><template>yes</template></category>
+  <category><pattern>XFIRM *</pattern><template>no</template></category>
+  <category><pattern>XFIRM</pattern><template>no</template></category>
+
+  <category><pattern>XHEDGE # HEDGE #</pattern><template>yes</template></category>
+  <category><pattern>XHEDGE # TENTATIVE #</pattern><template>yes</template></category>
+  <category><pattern>XHEDGE # EARLY NEXT WEEK #</pattern><template>yes</template></category>
+  <category><pattern>XHEDGE # CAN T PROMISE #</pattern><template>yes</template></category>
+  <category><pattern>XHEDGE # CANNOT PROMISE #</pattern><template>yes</template></category>
+  <category><pattern>XHEDGE # NOT FIRM #</pattern><template>yes</template></category>
+  <category><pattern>XHEDGE # NOT GUARANTEED #</pattern><template>yes</template></category>
+  <category><pattern>XHEDGE # ESTIMATE #</pattern><template>yes</template></category>
+  <category><pattern>XHEDGE *</pattern><template>no</template></category>
+  <category><pattern>XHEDGE</pattern><template>no</template></category>
+</aiml>

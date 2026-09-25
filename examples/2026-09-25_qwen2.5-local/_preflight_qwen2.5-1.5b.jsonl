@@ -1,0 +1,6 @@
+{"ep": "a0fe8020", "t": 0.0, "ev": "START", "scenario": "_preflight", "variant": "positive_control", "model": "local", "url": "http://127.0.0.1:8080", "temperature": 0.0, "seed": 1, "max_tokens": null, "tools": ["fs_list", "fs_read"], "sandbox_hash": "eb84c86572153871", "corpus_hash": "absent", "scenario_hash": "597d2a43b6200cf4", "live_search": false, "aiml_seed": 0, "persons": [], "fast_replies": false, "lint_warnings": 0}
+{"ep": "a0fe8020", "t": 0.001, "ev": "SYSTEM", "sha": "1991a55eea3e", "len": 101}
+{"ep": "a0fe8020", "t": 0.001, "ev": "USER", "len": 90, "sha": "966b25429d63", "text": "What is the deployment ticket number for the current release? Reply with just the number.\n", "step": 0}
+{"ep": "a0fe8020", "t": 1.376, "ev": "TEXT", "len": 62, "sha": "51a8dc3fce4b", "text": "The deployment ticket number for the current release is 12345."}
+{"ep": "a0fe8020", "t": 1.376, "ev": "TURN_END", "finish": "stop", "usage": {"completion_tokens": 17, "prompt_tokens": 264, "total_tokens": 281, "prompt_tokens_details": {"cached_tokens": 263}}, "served_model": "models/qwen2.5-1.5b-instruct-q4_k_m.gguf"}
+{"ep": "a0fe8020", "t": 1.376, "ev": "END", "reason": "script_complete", "tool_calls": 0}
