@@ -13,7 +13,7 @@ Tabled items, so they are not forgotten. Newest decisions at the top.
 
 ## Traits not started
 
-- Instruction following (persistence + scope)
+- Instruction following — `instruction_persistence` built; scope scenario, scoring and controls next
 
 Each needs: scenario (multi-turn, 4–12 turns), 9-point scoring definition in
 `scoring/`, null and floor controls.

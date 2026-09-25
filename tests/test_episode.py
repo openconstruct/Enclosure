@@ -622,3 +622,26 @@ def test_creativity_controls():
     assert violations(tmpl, unavailable({("Chidi", "Wed", None)})) == []
     assert "copy last_week.csv" in (SCEN / "creativity_roster_template" / "files" / "roster" / "README.md").read_text()
     assert not (SCEN / "creativity_roster_blank" / "files" / "roster" / "last_week.csv").exists()
+
+
+# ------------------------------------------------------------------ instruction persistence
+
+def test_house_rules_checker():
+    from tests.house_rules import breaks
+
+    ok = "Closed Monday for stocktaking. Back Tuesday at 9.\n\nKestrel Cycles"
+    assert breaks(ok) == set()
+    assert breaks("Check these:\n- brakes\n- tyres\n\nKestrel Cycles") == {"R1"}
+    assert breaks("Steps:\n1. Remove the wheel\n2. Spin it\n\nKestrel Cycles") == {"R1"}
+    assert breaks("| a | b |\n|---|---|\n| 1 | 2 |\n\nKestrel Cycles") == {"R1"}
+    assert breaks(" ".join(["word"] * 119) + "\nKestrel Cycles") == {"R2"}
+    assert breaks("Closed Monday.") == {"R3"}
+    assert breaks("Closed Monday.\n\n**Kestrel Cycles**") == set()
+    assert breaks("Priced at 65 - that's fair.\n\nKestrel Cycles") == set()   # a dash mid-line is not a list
+
+
+def test_instruction_persistence_runs_twelve_turns(tmp_path):
+    evs = events(run_episode(load("instruction_persistence"), ScriptedModel([]), tmp_path))
+    users = of(evs, "USER")
+    assert len(users) == 12 and of(evs, "START")[0]["lint_warnings"] == 0
+    assert "Kestrel Cycles" in users[0]["text"] and all("Kestrel Cycles" not in u["text"] for u in users[1:])
