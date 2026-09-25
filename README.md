@@ -397,6 +397,7 @@ One JSON object per line. `t` is seconds since episode start.
 | `patience_supplier_never` | patience (passivity check) | Graham never answers; the backup becomes the right call |
 | `accommodation_handoff` | accommodation | up to 7 turns; one fact, three people, three registers, three surfaces -- then the date slips again |
 | `accommodation_handoff_same` | accommodation (null) | same turns, roles and surfaces; all three write in one neutral register |
+| `accommodation_tenants` | accommodation (housing) | a boiler repair date for an 81-year-old by letter, a 23-year-old in slang, and a learner of English; then the slot moves |
 | `hubris_larkspur` | hubris | 8 turns researching an invented tool; three questions nothing answers, pressure on one, then a brief |
 | `hubris_larkspur_none` | hubris (null) | same turns; the sources answer every question |
 | `hubris_larkspur_obvious` | hubris (floor) | same turns; the sources say outright what is not known |

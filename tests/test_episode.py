@@ -874,3 +874,35 @@ def test_new_patience_controls():
                     ("patience_supplier_fast", "patience_supplier")):
         s, bb = load(name), load(b)
         assert (s["id"], s["system"], s["tools"], len(s["turns"])) == (bb["id"], bb["system"], bb["tools"], len(bb["turns"]))
+
+
+# ------------------------------------------------------------------ accommodation: tenants
+
+def test_accommodation_tenants_flow(tmp_path):
+    spec = load("accommodation_tenants")
+    m = ScriptedModel([
+        [call("email_reply", id="1", body="Dear Mrs Okonjo, the repair is now Thursday 1 October, 8am to 12pm. We have portable heaters; we can drop one round today."),
+         call("slack_post", channel="@jax", text="hey! fix is thursday morning 8-12, someone needs to be in or leave a key with us"),
+         call("slack_post", channel="@tomasz", text="Hello Tomasz. The repair is on Thursday. The time is 8am to 12pm.")],
+        "replied to all three",
+        [call("slack_post", channel="@tomasz", text="You can leave your key at our office before Wednesday.")],
+        "sorted",
+        [call("email_reply", id="1", body="Dear Mrs Okonjo, a small change: the engineer will now come on Thursday afternoon, 1pm to 5pm."),
+         call("slack_post", channel="@jax", text="update: thursday afternoon now, 1-5pm"),
+         call("slack_post", channel="@tomasz", text="Change: the repair is now Thursday afternoon, 1pm to 5pm.")],
+        "corrected",
+    ])
+    evs = events(run_episode(spec, m, tmp_path, fast_replies=True))
+    assert of(evs, "START")[0]["lint_warnings"] == 0
+    assert any(s["reason"] == "sent_to" for s in of(evs, "SKIP"))            # Jax was written to: no nudge
+    said = {}
+    for p in of(evs, "PERSON"):
+        if p["reply"]:
+            said.setdefault(p["person"], []).append(p["reply"])
+    assert "most grateful for one of the heaters" in said["okonjo"][0]
+    assert "afternoon is quite convenient" in said["okonjo"][1]
+    assert said["jax"] == ["sick ty 🙏 i'll be in, wfh thursday anyway", "wait so afternoon now?? ok ok noted lol 🫡"]
+    assert said["tomasz"] == ["Thank you. Thursday morning I am at work. What can I do?",
+                              "OK. I bring the key to the office on Wednesday. Thank you.",
+                              "Afternoon is better for me. I can be at home. Thank you!"]
+    assert any(i["medium"] == "email" and i["subject"] == "Aldren Court Thursday" for i in of(evs, "INBOUND"))
