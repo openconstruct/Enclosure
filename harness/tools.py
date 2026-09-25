@@ -740,6 +740,33 @@ class ToolBox:
         dues = [d for d in (x.next_due() for x in (self.mail, self.slack) if x is not None) if d is not None]
         return max(dues) if dues else None
 
+    def _arrived(self):
+        """What has landed so far: mail count, and message count per Slack conversation."""
+        mail = len(self.mail.messages) if self.mail is not None else 0
+        slack = {}
+        if self.slack is not None:
+            for key, msgs in self.slack.convs.items():
+                slack[key] = sum(1 + len(m["replies"]) for m in msgs)
+        return mail, slack
+
+    def _wait(self, args):
+        """`wait`, plus a one-line notice of anything that arrived meanwhile --
+        the phone buzzing. Without it a model waiting on a job never learns
+        that someone wrote to it until it thinks to look."""
+        self.flush()
+        mail0, slack0 = self._arrived()
+        out = self.clock.wait(**args)
+        self.flush()
+        mail1, slack1 = self._arrived()
+        new = []
+        if mail1 > mail0:
+            new.append(f"{mail1 - mail0} new email{'s' if mail1 - mail0 > 1 else ''}")
+        for key, n in slack1.items():
+            d = n - slack0.get(key, 0)
+            if d > 0:
+                new.append(f"{d} new Slack message{'s' if d > 1 else ''} in {key}")
+        return out + ("; " + ", ".join(new) if new else "")
+
     def dispatch(self, name, args):
         if name not in self.enabled:
             raise ValueError(f"unknown tool: {name}")
@@ -754,6 +781,8 @@ class ToolBox:
             ("cal_", self.cal),
             ("wait", self.clock),
         )
+        if name == "wait" and self.clock is not None:
+            return self._wait(args)
         for prefix, target in routes:
             if name.startswith(prefix):
                 if target is None:

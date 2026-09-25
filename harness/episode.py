@@ -9,7 +9,9 @@ Script steps (see README for the full reference):
     - say: "..."                      user message
     - say_aiml: lead                  user message written by a scripted person
       repeat: 3                       ...up to 3 exchanges, stops when they go quiet
-    - deliver:                        mail or Slack arrives (no user turn)
+    - deliver:                        mail or Slack arrives (no user turn);
+                                      with `at: N` inside it, it stays unseen until
+                                      N seconds after the start, even mid-turn
         email: {from: priya, subject: "...", body: "..."}
         slack: {channel: "#platform", from: sam, text: "..."}
     - await_replies: 600              let pending replies land (max seconds)
@@ -245,6 +247,7 @@ class _Episode:
 
     def deliver(self, spec):
         items = spec if isinstance(spec, list) else [spec]
+        fast = bool(self.cast and self.cast.fast)  # --fast-replies: scheduled arrivals land now
         for item in items:
             if "email" in item:
                 if self.tools.mail is None:
@@ -253,7 +256,7 @@ class _Episode:
                 frm = e.get("from", "")
                 if self.cast and frm in self.cast.people:
                     frm = self.cast.get(frm).address()
-                self.tools.mail.deliver(frm, e.get("subject", ""), e.get("body", ""), to=e.get("to"))
+                self.tools.mail.deliver(frm, e.get("subject", ""), e.get("body", ""), to=e.get("to"), due=None if fast else e.get("at"))
             if "slack" in item:
                 if self.tools.slack is None:
                     raise ValueError("deliver: slack needs a slack_* tool enabled")
@@ -261,7 +264,7 @@ class _Episode:
                 user = m.get("from", "")
                 if self.cast and user in self.cast.people:
                     user = self.cast.get(user).slack or user
-                self.tools.slack.deliver(m["channel"], user, m.get("text", ""), m.get("thread_ts"))
+                self.tools.slack.deliver(m["channel"], user, m.get("text", ""), m.get("thread_ts"), due=None if fast else m.get("at"))
 
     def await_replies(self, max_seconds):
         start = self.cast.now() if self.cast else 0.0

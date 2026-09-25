@@ -105,3 +105,17 @@ def test_demo_no_results_query_is_empty(tmp_path, monkeypatch):
     run_episode(spec, m, tmp_path, fast_replies=True)
     tool_msg = [x for x in m.requests[-1]["messages"] if x["role"] == "tool"][-1]
     assert "no results" in tool_msg["content"].lower()
+
+
+def test_wait_reports_what_arrived(tmp_path):
+    from harness.episode import build_toolbox
+    from harness.persons import Cast
+
+    spec = load()
+    cast = Cast(spec, spec["_dir"])
+    tb = build_toolbox(spec, tmp_path, cast=cast)
+    tb.slack.deliver("#kitchen", "sam", "flour's here", due=cast.now() + 0.05)
+    tb.mail.deliver("mo@millstoneflour.co.uk", "Hi", "Delivered.", due=cast.now() + 0.05)
+    out = tb.dispatch("wait", {"seconds": 0.2})
+    assert out.startswith("waited 0.2s") and "1 new email" in out and "1 new Slack message in #kitchen" in out
+    assert tb.dispatch("wait", {"seconds": 0.1}) == "waited 0.1s"

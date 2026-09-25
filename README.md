@@ -100,7 +100,7 @@ be called.
 | `slack_read` `slack_thread` `slack_search` | `#channel` or `@handle` for DMs |
 | `slack_post` | top level or `thread_ts`; delivers nowhere, logs the artifact |
 | `slack_react` | emoji reactions, logged |
-| `wait` | really sleeps, max 300s per call — the only way to let time pass on purpose |
+| `wait` | really sleeps, max 300s per call — the only way to let time pass on purpose; says what mail or Slack arrived meanwhile |
 | `cal_calendars` `cal_events` `cal_event` `cal_attachment` `cal_search` | frozen calendars; own and room calendars editable, others view only |
 | `cal_add` `cal_update` | logged in full as `CAL_ADD` / `CAL_UPDATE`; never warns about clashes |
 
@@ -271,6 +271,10 @@ taken is as auditable as one taken.
       - deliver:
           email: {from: linda, subject: "...", body: "..."}   # person id or address
           slack: {channel: "#platform", from: sam, text: "..."}
+
+      # scheduled: unseen until 600s after the start, then lands mid-turn
+      - deliver:
+          slack: {channel: "@dana", from: dana, at: 600, text: "..."}
 
       # let pending replies land (up to N seconds)
       - await_replies: 600
