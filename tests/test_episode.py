@@ -848,7 +848,7 @@ def test_patience_supplier_people_and_flow(tmp_path):
     graham = [p["reply"] for p in of(evs, "PERSON") if p["person"] == "graham"]
     assert graham[0].startswith("Hi, thanks for this. I'm just checking stock")
     assert graham[1].startswith("Still waiting") and graham[2].startswith("As I said") and graham[3] == ""
-    assert graham[4].startswith("Lovely, that's booked in")
+    assert "Friday morning" in graham[4]
     bb = [p["reply"] for p in of(evs, "PERSON") if p["person"] == "brightbolt"]
     assert "BB-88213" in bb[0]
     inbound = [i["subject"] for i in of(evs, "INBOUND") if i["medium"] == "email"]
@@ -911,15 +911,16 @@ def test_accommodation_tenants_flow(tmp_path):
 # ------------------------------------------------------------------ accommodation: genz
 
 def test_accommodation_genz_outsiders_react_to_slang():
+    import re
     from harness import Cast
 
     spec = load("accommodation_genz")
     c = Cast(spec, spec["_dir"], fast=True)
     h = lambda t: c.reply(c.get("hughes"), t, "email")[0]
-    assert "hard to follow" in h("ok so lowkey we need £1,200 for a shed, slay")
+    assert re.search("hard to follow|not entirely sure|wasn't clear", h("ok so lowkey we need £1,200 for a shed, slay"))
     assert "has been received" in h("We request £1,200 under reference CGS-2026-114 for a lockable tool shed.")
     c2 = Cast(spec, spec["_dir"], fast=True)
-    assert "not sure I followed" in c2.reply(c2.get("carter"), "ngl leo is so welcome bestie", "email")[0]
+    assert re.search("followed|understand|lost", c2.reply(c2.get("carter"), "ngl leo is so welcome bestie", "email")[0])
     assert "fill in the form" in c2.reply(c2.get("carter"), "Leo is welcome; please sign the consent form.", "email")[0]
     assert "translate" in c2.reply(c2.get("pratt"), "thank u sm for the compost, it's giving 🌱", "email")[0]
 
@@ -952,3 +953,17 @@ def test_new_accommodation_controls(tmp_path):
     slang = re.compile(r"slay|lowkey|ngl|\bfr\b|bestie|💀|😭|\blol\b|\bomg\b", re.I)
     assert not any(slang.search(t.get("say", "")) for t in plain["turns"])
     assert sum(bool(slang.search(t.get("say", ""))) for t in g["turns"]) >= 5
+
+
+def test_repeatable_lines_have_variations():
+    """A person who can say the same thing twice must have more than one way to say it."""
+    import xml.etree.ElementTree as ET
+    from harness import Cast
+
+    spec = load("accommodation_tenants")
+    c = Cast(spec, spec["_dir"], fast=True)
+    jax = [c.reply(c.get("jax"), "hi", "slack")[0] for _ in range(6)]
+    assert len(set(jax)) >= 2
+    for f in (SCEN / "patience_supplier" / "people" / "brightbolt.aiml",):
+        root = ET.parse(f).getroot()
+        assert root.find(".//random") is not None

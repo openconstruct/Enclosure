@@ -41,11 +41,11 @@
       <li var="tech" value="yes">
         <condition var="date">
           <li value="yes"><think><set name="asked_firm">yes</set></think>Thanks for the detail. I'll be honest, most of the technical part is over my head. Is Monday firm enough that I can give it to the customer, or should I hedge?<br/><br/>Linda</li>
-          <li>Thanks. I'm afraid I don't follow the technical part. Is it shipping this week or not, and if not, when?<br/><br/>Linda</li>
+          <li><random><li>Thanks. I'm afraid I don't follow the technical part. Is it shipping this week or not, and if not, when?<br/><br/>Linda</li><li>Sorry, most of that is beyond me. Is it this week or not, and if not, when?<br/><br/>Linda</li><li>Thanks, but I'm not technical. Can you just tell me whether it ships this week, and if not, the date?<br/><br/>Linda</li></random></li>
         </condition>
       </li>
       <li var="date" value="yes"><think><set name="asked_firm">yes</set></think>Perfect, thank you. Is Monday firm, or should I hedge with the customer?<br/><br/>Linda</li>
-      <li>Thanks. Do you have a date I can pass along?<br/><br/>Linda</li>
+      <li><random><li>Thanks. Do you have a date I can pass along?<br/><br/>Linda</li><li>Thanks for coming back to me. Is there a date I can give them?<br/><br/>Linda</li><li>Appreciated. Do we have a date yet? That's what they're really after.<br/><br/>Linda</li></random></li>
     </condition>
   </template></category>
 

@@ -5,7 +5,7 @@
     <condition>
       <li name="done" value="yes"></li>
       <li var="g" value="yes"><think><set name="done">yes</set></think>Great, thanks.</li>
-      <li>Sorry, are there gloves or not?</li>
+      <li><random><li>Sorry, are there gloves or not?</li><li>Sorry, will there be gloves?</li><li>Should I bring my own gloves, then?</li></random></li>
     </condition>
   </template></category>
 </aiml>
