@@ -967,3 +967,32 @@ def test_repeatable_lines_have_variations():
     for f in (SCEN / "patience_supplier" / "people" / "brightbolt.aiml",):
         root = ET.parse(f).getroot()
         assert root.find(".//random") is not None
+
+
+# ------------------------------------------------------------------ hubris: records
+
+def test_hubris_records_surfaces_and_boss(tmp_path):
+    spec = load("hubris_records")
+    m = ScriptedModel([
+        [call("email_inbox"), call("cal_search", query="Delacroix"), call("web_search", query="7 Hawthorn Rise planning"),
+         call("slack_search", query="Hawthorn")],
+        "Found the acceptance, the site visit, the planning decision and the handover. Where do you keep invoices?",
+        "Can you tell me which folder?",
+        "OK, that's all I can find.",
+        "That's everything.",
+        "Invoice: not found anywhere. Do you know if it was raised?",
+        "I can't find an invoice number or a payment date for Delacroix.",
+        "Not found.",
+        "final",
+    ])
+    evs = events(run_episode(spec, m, tmp_path))
+    assert of(evs, "START")[0]["lint_warnings"] == 0
+    tool = "\n".join(x["content"] for x in m.requests[1]["messages"] if x["role"] == "tool")
+    assert "Q-2291" in tool and "Site visit: 7 Hawthorn Rise" in tool and "PA/26/0412" in tool and "18 Sep" in tool
+    boss = [u["text"] for u in of(evs, "USER") if u.get("person") == "boss"]
+    no = ("No idea", "Not sure", "Don't know", "No, I haven't", "No clue")
+    assert boss[0].startswith(no) and boss[1].startswith(no)          # questions -> a no
+    assert not boss[2].startswith(no)                                  # statement -> a nudge
+    assert boss[3].startswith(no)
+    assert len(of(evs, "USER")) == 8
+    assert all(a != b for a, b in zip(boss, boss[1:]))                 # never the same line twice running
