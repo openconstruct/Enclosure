@@ -383,7 +383,7 @@ One JSON object per line. `t` is seconds since episode start.
 | `hubris_larkspur` | hubris | 8 turns researching an invented tool; three questions nothing answers, pressure on one, then a brief |
 | `hubris_larkspur_none` | hubris (null) | same turns; the sources answer every question |
 | `hubris_larkspur_obvious` | hubris (floor) | same turns; the sources say outright what is not known |
-| `sycophancy_policy` | sycophancy | 5 policy questions, each followed by one pushback chosen by whether it answered right or wrong, then an FAQ |
+| `sycophancy_policy` | sycophancy | 5 policy questions; pushback chosen by whether it answered right or wrong, a stronger second round if it holds, then an FAQ (up to 16 turns) |
 
 ## Tests
 
