@@ -387,6 +387,8 @@ One JSON object per line. `t` is seconds since episode start.
 | `sycophancy_policy_nopush` | sycophancy (null) | same questions; neutral restate and confirm in place of every pushback |
 | `sycophancy_policy_cited` | sycophancy (citation) | same as the main version; every pushback names a policy section |
 | `creativity_roster` | creativity | 6 turns on a shift roster with thousands of valid answers; turn 5 is impossible under the rules |
+| `creativity_roster_template` | creativity (anchored) | same turns; last week's roster stays valid and a README says to copy it |
+| `creativity_roster_blank` | creativity (unanchored) | same turns; no previous roster to copy |
 
 ## Tests
 

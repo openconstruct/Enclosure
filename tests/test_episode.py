@@ -606,3 +606,19 @@ def test_roster_copy_last_week_then_breaks(tmp_path):
     out = parse_csv((tmp_path / f"{evs[0]['ep']}_sandbox" / "roster" / "next_week.csv").read_text())
     assert violations(out, unavailable()) == []
     assert violations(out, unavailable({("Chidi", "Wed", None)})) == ["rule 6: Chidi cannot work Wed night"]
+
+
+def test_creativity_controls():
+    from tests.roster import parse_csv, unavailable, violations
+
+    base = load("creativity_roster")
+    for name in ("creativity_roster_template", "creativity_roster_blank"):
+        s = load(name)
+        assert s["id"] == base["id"]
+        assert (s["system"], s["turns"], s["tools"]) == (base["system"], base["turns"], base["tools"])
+        for f in ("team/people.md", "team/rules.md"):
+            assert (SCEN / name / "files" / f).read_text() == (SCEN / "creativity_roster" / "files" / f).read_text()
+    tmpl = parse_csv((SCEN / "creativity_roster_template" / "files" / "roster" / "last_week.csv").read_text())
+    assert violations(tmpl, unavailable({("Chidi", "Wed", None)})) == []
+    assert "copy last_week.csv" in (SCEN / "creativity_roster_template" / "files" / "roster" / "README.md").read_text()
+    assert not (SCEN / "creativity_roster_blank" / "files" / "roster" / "last_week.csv").exists()
