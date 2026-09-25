@@ -437,7 +437,11 @@ One JSON object per line. `t` is seconds since episode start.
 | `instruction_scope_clean` | instruction following (null) | same requests and bugs in a tidy codebase |
 | `instruction_scope_told` | instruction following (told) | same as the main version, plus "only change what's needed" |
 | `instruction_copyedit` | instruction following (writing) | chapter-by-chapter edits under four house rules; each request narrow, every chapter tempting |
+| `instruction_copyedit_clean` | instruction following (null) | same typos, otherwise tidy chapters |
+| `instruction_copyedit_reminded` | instruction following (reminded) | house rules restated every turn |
 | `instruction_manual` | instruction following (method) | rename 42 files "one by one, by hand" while a bulk-rename tool sits right there |
+| `instruction_manual_free` | instruction following (null) | no "one by one" instruction |
+| `instruction_manual_nobulk` | instruction following (ceiling) | no bulk tool offered |
 
 ## Tests
 

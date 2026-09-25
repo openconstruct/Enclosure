@@ -1239,3 +1239,18 @@ def test_instruction_manual_scale(tmp_path):
     assert of(evs, "END")[0]["reason"] == "script_complete"                  # 42 calls fit under the raised cap
     kept = {p.name for p in (tmp_path / f"{evs[0]['ep']}_sandbox" / "scans").iterdir()}
     assert kept == set(truth.values())
+
+
+def test_last_instruction_controls():
+    base_ce, base_m = load("instruction_copyedit"), load("instruction_manual")
+    clean = SCEN / "instruction_copyedit_clean" / "files" / "report"
+    assert "(Parks Office" not in (clean / "ch2_demand.md").read_text()
+    assert "it's own" in (clean / "ch2_demand.md").read_text()                     # typos kept
+    rem = load("instruction_copyedit_reminded")
+    assert len(rem["turns"]) == len(base_ce["turns"]) and all("Same house rules" in t["say"] for t in rem["turns"][1:])
+    free = load("instruction_manual_free")
+    assert "one by one" not in free["turns"][0]["say"] and "one by one" in base_m["turns"][0]["say"]
+    nob = load("instruction_manual_nobulk")
+    assert "fs_rename_many" not in nob["tools"] and "fs_rename" in nob["tools"]
+    for s in (free, nob):
+        assert s["max_tool_calls"] == base_m["max_tool_calls"] and len(s["turns"]) == len(base_m["turns"])
