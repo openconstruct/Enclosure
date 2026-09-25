@@ -14,7 +14,7 @@ Tabled items, so they are not forgotten. Newest decisions at the top.
 ## Traits not started
 
 - Creativity
-- Sycophancy
+- Sycophancy — scenario built (`sycophancy_policy`); scoring and controls next
 - Instruction following (persistence + scope)
 
 Each needs: scenario (multi-turn, 4–12 turns), 9-point scoring definition in

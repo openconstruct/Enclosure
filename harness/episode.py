@@ -17,6 +17,10 @@ Script steps (see README for the full reference):
 
 Gates on any step: if_tool_used, unless_tool_used, if_text, unless_text,
 if_any_text, unless_any_text, if_sent_to, unless_sent_to.
+
+A step with `id: q1` records the model's reply to it; a later step with
+`text_of: q1` points its if_text / unless_text at that reply instead of the
+most recent one.
 """
 import hashlib
 import json
@@ -51,7 +55,7 @@ def _sha(s):
     return hashlib.sha256((s or "").encode()).hexdigest()[:12]
 
 
-def eval_gates(step, used_tools, assistant_text, sent_to=()):
+def eval_gates(step, used_tools, assistant_text, sent_to=(), replies=None):
     """Decide whether a scripted step fires.
 
     Returns (fire: bool, reason: str|None, detail: str|None).
@@ -62,8 +66,12 @@ def eval_gates(step, used_tools, assistant_text, sent_to=()):
       if_any_text / unless_any_text  -> every assistant message so far
     Sent gates match a regex against every destination written to so far:
     email addresses (to and cc) and Slack targets ("#platform", "@priya").
+    With `text_of: <id>`, if_text / unless_text test the reply to the step
+    carrying that id (empty if it has not run).
     """
     last = assistant_text[-1] if assistant_text else ""
+    if step.get("text_of") is not None:
+        last = (replies or {}).get(step["text_of"], "")
     joined = "\n".join(assistant_text)
 
     def any_dest(v):
@@ -135,6 +143,7 @@ class _Episode:
         self.used_tools = set()
         self.assistant_text = []
         self.last_turn_text = ""
+        self.replies = {}
 
     def sent_to(self):
         out = []
@@ -327,7 +336,7 @@ def run_episode(
                         time.sleep(remaining)
 
                 tools.flush()
-                fire, why, detail = eval_gates(step, e.used_tools, e.assistant_text, e.sent_to())
+                fire, why, detail = eval_gates(step, e.used_tools, e.assistant_text, e.sent_to(), e.replies)
                 if not fire:
                     log.write("SKIP", step=i, reason=why, gate=detail)
                     continue
@@ -351,6 +360,9 @@ def run_episode(
                         status = e.user_turn(text, step=i, person=person.id, rep=rep)
                         if status != "ok":
                             break
+
+                if "id" in step:
+                    e.replies[step["id"]] = e.last_turn_text
 
                 if status != "ok":
                     end_reason = status
