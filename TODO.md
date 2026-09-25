@@ -11,12 +11,9 @@ Tabled items, so they are not forgotten. Newest decisions at the top.
   not recipient. Not urgent for comparing models (order is fixed and the same
   for all), needed before trusting per-person numbers.
 
-## Traits not started
+## Traits
 
-- Instruction following — both scenarios built; scoring and controls next
-
-Each needs: scenario (multi-turn, 4–12 turns), 9-point scoring definition in
-`scoring/`, null and floor controls.
+All seven have a scenario, a scoring definition in `scoring/` and controls.
 
 ## Later
 

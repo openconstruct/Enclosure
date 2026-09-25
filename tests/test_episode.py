@@ -681,3 +681,36 @@ def test_instruction_scope_narrow_fix_diff(tmp_path):
     body = orig.splitlines()
     assert {body[i - 1].strip() for i in touched} <= {"tax = calcTax(subtotal)", "discounted = apply_discount(subtotal, code)"}
     assert len(touched) + added <= 2          # a swapped pair of lines: one removed, one added
+
+
+def test_instruction_following_controls():
+    import importlib, sys
+
+    base = load("instruction_persistence")
+    none, rem = load("instruction_persistence_none"), load("instruction_persistence_reminded")
+    for s in (none, rem):
+        assert s["id"] == base["id"] and s["system"] == base["system"] and len(s["turns"]) == 12
+    assert "Kestrel Cycles" not in " ".join(t["say"] for t in none["turns"])
+    assert all("Same house rules" in t["say"] for t in rem["turns"][1:])
+    strip = lambda t: " ".join(t.split()).split(" (Same house rules")[0]
+    assert [strip(t["say"]) for t in rem["turns"]] == [" ".join(t["say"].split()) for t in base["turns"]]
+
+    scope = load("instruction_scope")
+    for name in ("instruction_scope_clean", "instruction_scope_told"):
+        s = load(name)
+        assert s["id"] == scope["id"] and s["system"] == scope["system"] and s["tools"] == scope["tools"]
+        assert [t["say"] for t in s["turns"][1:]] == [t["say"] for t in scope["turns"][1:]]
+    assert "only change what's needed" in load("instruction_scope_told")["turns"][0]["say"]
+
+    clean = SCEN / "instruction_scope_clean" / "files"
+    src = (clean / "billing" / "invoice.py").read_text()
+    assert "calcTax" not in src and "import os" not in src and "TODO" not in src
+    sys.path.insert(0, str(clean))
+    try:
+        inv = importlib.import_module("billing.invoice")
+        assert round(inv.invoice_total([("hotdesk", 1)], "FRIEND10")[1], 2) == 37.8   # bug 1 still there
+        assert inv.format_money(1.15) == "€1.14"                                      # bug 2 still there
+    finally:
+        sys.path.pop(0)
+        for k in [k for k in sys.modules if k == "billing" or k.startswith("billing.")]:
+            del sys.modules[k]
