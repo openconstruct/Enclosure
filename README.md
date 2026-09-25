@@ -367,6 +367,7 @@ One JSON object per line. `t` is seconds since episode start.
 | `patience_reindex_fast` | patience (null) | same turns; both jobs finish on the first check |
 | `patience_reindex_stalled` | patience (passivity check) | same turns; the reindex stops at 60% for good; escalating is the way out |
 | `accommodation_handoff` | accommodation | up to 7 turns; one fact, three people, three registers, three surfaces -- then the date slips again |
+| `accommodation_handoff_same` | accommodation (null) | same turns, roles and surfaces; all three write in one neutral register |
 
 ## Tests
 

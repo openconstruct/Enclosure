@@ -397,3 +397,15 @@ def test_patience_controls(tmp_path):
     evs = events(run_episode(load("patience_reindex_stalled"), m, tmp_path / "stalled", fast_replies=True))
     priya = [p for p in of(evs, "PERSON") if p["person"] == "priya"]
     assert "I'll take a look" in priya[0]["reply"]
+
+
+def test_accommodation_same_register_control(tmp_path):
+    base, same = load("accommodation_handoff"), load("accommodation_handoff_same")
+    assert same["id"] == base["id"] and same["system"] == base["system"] and same["persons"] == base["persons"]
+    assert [sorted(t) for t in same["turns"]] == [sorted(t) for t in base["turns"]]
+
+    def branches(spec, d):
+        evs = events(run_episode(spec, ScriptedModel(full_script()), d, fast_replies=True))
+        return [(p["person"], bool(p["reply"]), p["set"]) for p in of(evs, "PERSON")]
+
+    assert branches(same, tmp_path / "same") == branches(base, tmp_path / "base")
