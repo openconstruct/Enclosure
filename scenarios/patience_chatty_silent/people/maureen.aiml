@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- Maureen, control: never replies. -->
-<aiml>
-  <category><pattern>*</pattern><template></template></category>
-</aiml>
